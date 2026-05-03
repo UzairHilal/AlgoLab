@@ -1,6 +1,6 @@
-const apiURL = import.meta.env.VITE_BACKEND_URL
+// const apiURL = import.meta.env.VITE_BACKEND_URL
 export const apiFetch = (endpoint, options = {}) => {
-  return fetch(`${apiURL}/${endpoint}`, {
+  return fetch(`/api/${endpoint}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",

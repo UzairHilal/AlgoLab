@@ -9,6 +9,10 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 import { useEffect, useState } from "react";
 import { Button } from "./components/ui/button";
 import { AppWindow, File, Shield, Sparkles } from "lucide-react";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import AdminRoute from "./components/auth/AdminRoute";
+import AdminStudents from "./components/admin/AdminStudents";
+import StudentDetails from "./components/admin/StudentDetails";
 
 export default function App() {
   const location = useLocation();
@@ -59,10 +63,27 @@ export default function App() {
               </Route>
 
               {/* Admin */}
-              <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/teacher" element={<div>Teacher Route</div>} />
-              </Route>
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+
+              <Route
+                path="/admin/students"
+                element={
+                  <AdminRoute>
+                    <AdminStudents />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/students/:id"
+                element={<StudentDetails />}
+              />
             </Routes>
 
           </div>
@@ -154,29 +175,3 @@ function AdminTabs() {
 
 
 
-/* =========================
-  ADMIN PAGE UI
-========================= */
-function AdminDashboard() {
-  return (
-    <div className="flex flex-col gap-4">
-
-      <div className="flex items-center gap-2 text-xl font-semibold">
-        <Sparkles className="text-purple-400" size={18} />
-        Admin Panel
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-          Manage Algorithms
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-          Manage Users
-        </div>
-
-      </div>
-    </div>
-  );
-}

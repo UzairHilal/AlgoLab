@@ -33,6 +33,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/progress", progressRoute)
+
+app.use((req, res) => {
+  res.sendFile(
+    path.join(__dirname, "../frontend/dist/index.html")
+  );
+});
+
 app.listen(3000, () => {
   console.log("Server running on 3000");
 });

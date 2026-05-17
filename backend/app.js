@@ -5,6 +5,10 @@ import algorithmRoutes from "./routes/algorithm.js";
 import authRoutes from "./routes/auth.js";
 import submissionRoutes from "./routes/submissions.js";
 import assignmentRoutes from "./routes/assignments.js";
+import adminRoutes from "./routes/admin.js"
+import adminStudentsRoutes
+  from "./routes/adminStudents.js";
+
 import connectDB from "./config/db.js";
 import progressRoute from "./routes/progress.js"
 import path from "path";
@@ -33,6 +37,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/progress", progressRoute)
+app.use("/api/admin", adminRoutes);
+app.use("/api/admin/students",adminStudentsRoutes);
 
 app.use((req, res) => {
   res.sendFile(

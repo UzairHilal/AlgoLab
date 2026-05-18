@@ -132,7 +132,7 @@ export default function Register() {
                             />
                         </div>
 
-                        <div className="flex gap-3 mt-2">
+                        {/* <div className="flex gap-3 mt-2">
 
                             <button
                                 type="button"
@@ -162,7 +162,7 @@ export default function Register() {
                                 Teacher
                             </button>
 
-                        </div>
+                        </div> */}
 
                         <button
                             onClick={handleRegister}

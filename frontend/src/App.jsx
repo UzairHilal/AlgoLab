@@ -42,7 +42,7 @@ export default function App() {
         {/* TABS */}
         <div className="sticky top-0 z-40 backdrop-blur-md bg-white/5 border-b border-white/10">
           {role === "student" && <StudentTabs />}
-          {role === "admin" && <AdminTabs />}
+          {/* {role === "admin" && <AdminTabs />} */}
         </div>
 
         {/* MAIN CONTENT */}
@@ -107,7 +107,7 @@ function StudentTabs() {
 
   const tabs = [
     { label: "Algorithms", icon: AppWindow, path: "/" },
-    { label: "Submissions", icon: File, path: "/submissions" },
+    // { label: "Submissions", icon: File, path: "/submissions" },
   ];
 
   return (
@@ -145,31 +145,31 @@ function StudentTabs() {
 /* =========================
    ADMIN TABS : ---- todo : (separate workflow)
 ========================= */
-function AdminTabs() {
-  const navigate = useNavigate();
-  const location = useLocation();
+// function AdminTabs() {
+//   const navigate = useNavigate();
+//   const location = useLocation();
 
-  const active = location.pathname === "/admin";
+//   const active = location.pathname === "/admin";
 
-  return (
-    <div className="flex gap-2 px-4 py-3">
+//   return (
+//     <div className="flex gap-2 px-4 py-3">
 
-      <button
-        onClick={() => navigate("/admin")}
-        className={`
-          flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all
-          ${active
-            ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md"
-            : "text-gray-400 hover:text-white hover:bg-white/10"}
-        `}
-      >
-        <Shield size={16} />
-        Admin Dashboard
-      </button>
+//       <button
+//         onClick={() => navigate("/admin")}
+//         className={`
+//           flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all
+//           ${active
+//             ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md"
+//             : "text-gray-400 hover:text-white hover:bg-white/10"}
+//         `}
+//       >
+//         <Shield size={16} />
+        
+//       </button>
 
-    </div>
-  );
-}
+//     </div>
+//   );
+// }
 
 
 

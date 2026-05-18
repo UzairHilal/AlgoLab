@@ -110,11 +110,11 @@ const VisualiztionTab = ({ algo }) => {
     return () => clearInterval(id);
   });
 
-  useEffect(() => {
-    step.found ? toast.success(step.message) : toast.error(step.message);
+  // useEffect(() => {
+  //   step.found ? toast.success(step.message) : toast.error(step.message);
 
-    return () => {i >= steps.length - 1 && toast.dismissAll()};
-  });
+  //   return () => {i >= steps.length - 1 && toast.dismissAll()};
+  // });
 
   return (
     <div>

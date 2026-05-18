@@ -16,7 +16,7 @@ export default function Register() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [role, setRole] = useState("");
+    const [role, setRole] = useState("student");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 

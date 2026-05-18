@@ -16,17 +16,17 @@ function Tabs({ activeTab, setActiveTab, markAsRead }) {
     setActiveTab(tab);
   };
   return (
-    <div className="w-full flex gap-2  p-2 ">
-      <Button
-        onClick={() => handleTabChange("info")}
-        className={
-          activeTab === "info"
-            ? "bg-[var(--bg-secondary)] border-blue-200/80"
-            : ""
-        }
-      >
-        Info <Text />
-      </Button>
+    <div className="w-full flex gap-2 p-2 overflow-x-auto">
+            <Button
+      onClick={() => handleTabChange("info")}
+      className={
+        activeTab === "info"
+          ? "bg-[var(--bg-secondary)] border-blue-200/80"
+          : ""
+      }
+    >
+      Info <Text />
+    </Button>
 
       <Button
         onClick={() => handleTabChange("flow")}
@@ -57,7 +57,7 @@ function Tabs({ activeTab, setActiveTab, markAsRead }) {
             ? "bg-[var(--bg-secondary)] border-blue-200/80"
             : ""
         }
-        // disabled={!markAsRead && activeTab === "info"}
+      // disabled={!markAsRead && activeTab === "info"}
       >
         CodeEditor <Code />
       </Button>

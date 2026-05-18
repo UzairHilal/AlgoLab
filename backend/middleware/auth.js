@@ -1,4 +1,6 @@
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv"
+dotenv.config();
 
 export const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization;
@@ -6,7 +8,7 @@ export const authMiddleware = (req, res, next) => {
   if (!token) return res.status(401).json({ msg: "No token" });
 
   try {
-    const decoded = jwt.verify(token, "secret123");
+    const decoded = jwt.verify(token, process.env.SECRECT_KEY);
     req.user = decoded;
     next();
   } catch {

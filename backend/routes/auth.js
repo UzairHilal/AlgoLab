@@ -4,7 +4,8 @@ import path from "path";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { fileURLToPath } from "url";
-
+import dotconf from "dotenv"
+dotconf.config();
 
 import User from "../models/User.js";
 
@@ -38,7 +39,7 @@ router.post("/register", async (req, res) => {
     user.save()
     const token = jwt.sign(
       { id: user._id, role: user.role },
-      "secret123",
+      process.env.SECRECT_KEY,
       { expiresIn: "7d" }
     );
 
@@ -67,7 +68,7 @@ router.post("/login", async (req, res) => {
 
   const token = jwt.sign(
     { id: user.id, role: user.role },
-    "secret123"
+    process.env.SECRECT_KEY
   );
 
   res.json({ token, role: user.role });

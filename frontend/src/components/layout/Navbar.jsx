@@ -75,7 +75,7 @@ function Navbar() {
                             Welcome back 👋
                         </span>
 
-                        <motion.div
+                        {/* <motion.div
                             whileHover={{ scale: 1.08 }}
                             className="cursor-pointer"
                         >
@@ -86,7 +86,7 @@ function Navbar() {
                                 />
                                 <AvatarFallback>ND</AvatarFallback>
                             </Avatar>
-                        </motion.div>
+                        </motion.div> */}
 
                     </div>
                 )}

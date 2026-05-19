@@ -1,6 +1,6 @@
-# Algo Demonstrator
+# SCiVLab
 
-Interactive MERN Stack based Algorithm Learning & Visualization Platform.
+Interactive Algorithm Learning & Visualization Platform.
 
 Students can:
 - Learn algorithms visually

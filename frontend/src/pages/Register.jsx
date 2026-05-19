@@ -1,133 +1,166 @@
 import { apiFetch } from "@/utils/api";
+
 import { useState } from "react";
+
 import toast from "react-hot-toast";
+
 import { motion } from "motion/react";
 
 import {
-    User,
-    Lock,
-    Eye,
-    EyeOff,
-    Sparkles,
-    Shield,
-    GraduationCap,
-    Hash
+  User,
+  Lock,
+  Eye,
+  EyeOff,
+  Sparkles,
+  Hash
 } from "lucide-react";
 
 export default function Register() {
 
-    const [fullName, setFullName] = useState("");
+  const [fullName, setFullName] =
+    useState("");
 
-    const [rollNumber, setRollNumber] = useState("");
+  const [rollNumber, setRollNumber] =
+    useState("");
 
-    const [password, setPassword] = useState("");
+  const [password, setPassword] =
+    useState("");
 
-    const [confirmPassword, setConfirmPassword] = useState("");
+  const [
+    confirmPassword,
+    setConfirmPassword
+  ] = useState("");
 
-    const [role, setRole] = useState("student");
+  const [role] =
+    useState("student");
 
-    const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
-    const [showPassword, setShowPassword] = useState(false);
+  const [
+    showPassword,
+    setShowPassword
+  ] = useState(false);
 
-    const handleRegister = async () => {
+  const handleRegister =
+    async () => {
 
-        // ================= VALIDATION =================
+      if (
+        !fullName ||
+        !password
+      ) {
 
-        if (!fullName || !password) {
-            return toast.error(
-                "All fields are required"
-            );
-        }
+        return toast.error(
+          "All fields are required"
+        );
+      }
 
-        if (
-            role === "student" &&
-            !rollNumber
-        ) {
-            return toast.error(
-                "Roll number is required"
-            );
-        }
+      if (
+        role === "student" &&
+        !rollNumber
+      ) {
 
-        if (password.length < 6) {
-            return toast.error(
-                "Password must be at least 6 characters"
-            );
-        }
+        return toast.error(
+          "Roll number is required"
+        );
+      }
 
-        if (
-            password !== confirmPassword
-        ) {
-            return toast.error(
-                "Passwords do not match"
-            );
-        }
+      if (
+        password.length < 6
+      ) {
 
-        setLoading(true);
+        return toast.error(
+          "Password must be at least 6 characters"
+        );
+      }
 
-        try {
+      if (
+        password !==
+        confirmPassword
+      ) {
 
-            const res = await apiFetch(
-                "auth/register",
-                {
-                    method: "POST",
+        return toast.error(
+          "Passwords do not match"
+        );
+      }
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+      setLoading(true);
 
-                    body: JSON.stringify({
-                        fullName,
-                        rollNumber:
-                            role === "student"
-                                ? rollNumber
-                                : "",
-                        role,
-                        password
-                    })
-                }
-            );
+      try {
 
-            const data =
-                await res.json();
+        const res =
+          await apiFetch(
+            "auth/register",
+            {
+              method: "POST",
 
-            if (!res.ok) {
-                throw new Error(
-                    data.msg ||
-                    "Registration failed"
-                );
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+                fullName,
+
+                rollNumber:
+                  role ===
+                  "student"
+                    ? rollNumber
+                    : "",
+
+                role,
+
+                password
+              })
             }
+          );
 
-            localStorage.setItem(
-                "token",
-                data.token
-            );
+        const data =
+          await res.json();
 
-            localStorage.setItem(
-                "role",
-                data.role
-            );
+        if (!res.ok) {
 
-            toast.success(
-                "Account created 🚀"
-            );
+          throw new Error(
+            data.msg ||
+            "Registration failed"
+          );
 
-            window.location.href = "/";
-
-        } catch (err) {
-
-            toast.error(err.message);
-
-        } finally {
-
-            setLoading(false);
         }
+
+        localStorage.setItem(
+          "token",
+          data.token
+        );
+
+        localStorage.setItem(
+          "role",
+          data.role
+        );
+
+        toast.success(
+          "Account created 🚀"
+        );
+
+        window.location.href =
+          "/";
+
+      } catch (err) {
+
+        toast.error(
+          err.message
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
     };
 
-    return (
-        <div
-            className="
+  return (
+
+    <div
+      className="
         min-h-screen
         flex
         items-center
@@ -135,33 +168,33 @@ export default function Register() {
         px-4
         text-white
       "
-        >
+    >
 
-            <motion.div
-                initial={{
-                    opacity: 0,
-                    y: 40,
-                    filter: "blur(10px)"
-                }}
+      <motion.div
+        initial={{
+          opacity: 0,
+          y: 40,
+          filter: "blur(10px)"
+        }}
 
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                    filter: "blur(0px)"
-                }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)"
+        }}
 
-                transition={{
-                    duration: 0.5
-                }}
+        transition={{
+          duration: 0.5
+        }}
 
-                className="
+        className="
           w-full
           max-w-md
         "
-            >
+      >
 
-                <div
-                    className="
+        <div
+          className="
             bg-white/5
             backdrop-blur-xl
             border
@@ -170,85 +203,79 @@ export default function Register() {
             p-8
             shadow-xl
           "
-                >
+        >
 
-                    {/* HEADER */}
-
-                    <div
-                        className="
+          <div
+            className="
               flex
               flex-col
               items-center
               gap-2
               mb-6
             "
-                    >
+          >
 
-                        <Sparkles
-                            className="
+            <Sparkles
+              className="
                 text-emerald-400
               "
-                        />
+            />
 
-                        <h2
-                            className="
+            <h2
+              className="
                 text-2xl
                 md:text-3xl
                 font-bold
               "
-                        >
-                            Create Account
-                        </h2>
+            >
+              Create Account
+            </h2>
 
-                        <p
-                            className="
+            <p
+              className="
                 text-sm
                 text-gray-400
               "
-                        >
-                            Start your Algo journey
-                        </p>
+            >
+              Start your Algo journey
+            </p>
 
-                    </div>
+          </div>
 
-                    {/* FORM */}
-
-                    <div
-                        className="
+          <div
+            className="
               flex
               flex-col
               gap-4
             "
-                    >
+          >
 
-                        {/* FULL NAME */}
+            <div className="relative">
 
-                        <div className="relative">
-
-                            <User
-                                className="
+              <User
+                className="
                   absolute
                   left-3
                   top-3
                   text-gray-400
                 "
-                                size={16}
-                            />
+                size={16}
+              />
 
-                            <input
-                                type="text"
+              <input
+                type="text"
 
-                                value={fullName}
+                value={fullName}
 
-                                onChange={(e) =>
-                                    setFullName(
-                                        e.target.value
-                                    )
-                                }
+                onChange={(e) =>
+                  setFullName(
+                    e.target.value
+                  )
+                }
 
-                                placeholder="Full Name"
+                placeholder="Full Name"
 
-                                className="
+                className="
                   w-full
                   pl-10
                   pr-3
@@ -261,133 +288,41 @@ export default function Register() {
                   focus:ring-2
                   focus:ring-emerald-500
                 "
-                            />
+              />
 
-                        </div>
+            </div>
 
-                        {/* ROLE SELECT */}
+            {role ===
+              "student" && (
 
-                        {/* <div
-                            className="
-                flex
-                gap-3
-              "
-                        >
+              <div className="relative">
 
-                            <button
-                                type="button"
-
-                                onClick={() =>
-                                    setRole("student")
-                                }
-
-                                className={`
-                  flex-1
-                  flex
-                  items-center
-                  justify-center
-                  gap-2
-                  py-2
-                  rounded-xl
-                  border
-                  transition
-
-                  ${role === "student"
-                                        ? `
-                      bg-emerald-500/20
-                      border-emerald-400
-                      text-emerald-300
-                    `
-                                        : `
-                      border-white/10
-                      text-gray-400
-                      hover:bg-white/10
-                    `
-                                    }
-                `}
-                            >
-
-                                <GraduationCap
-                                    size={16}
-                                />
-
-                                Student
-
-                            </button>
-
-                            <button
-                                type="button"
-
-                                onClick={() =>
-                                    setRole("admin")
-                                }
-
-                                className={`
-                  flex-1
-                  flex
-                  items-center
-                  justify-center
-                  gap-2
-                  py-2
-                  rounded-xl
-                  border
-                  transition
-
-                  ${role === "admin"
-                                        ? `
-                      bg-purple-500/20
-                      border-purple-400
-                      text-purple-300
-                    `
-                                        : `
-                      border-white/10
-                      text-gray-400
-                      hover:bg-white/10
-                    `
-                                    }
-                `}
-                            >
-
-                                <Shield
-                                    size={16}
-                                />
-
-                                Teacher
-
-                            </button>
-
-                        </div> */}
-
-                        {/* ROLL NUMBER */}
-
-                        {role === "student" && (
-
-                            <div className="relative">
-
-                                <Hash
-                                    className="
+                <Hash
+                  className="
                     absolute
                     left-3
                     top-3
                     text-gray-400
                   "
-                                    size={16}
-                                />
+                  size={16}
+                />
 
-                                <input
-                                    type="text"
+                <input
+                  type="text"
 
-                                    value={rollNumber}
+                  value={
+                    rollNumber
+                  }
 
-                                    onChange={(e) =>
-                                        setRollNumber(
-                                            e.target.value.toUpperCase()
-                                        )
-                                    }
+                  onChange={(e) =>
+                    setRollNumber(
+                      e.target.value.toUpperCase()
+                    )
+                  }
 
-                                    placeholder="Roll Number"
+                  placeholder="Roll Number"
 
-                                    className="
+                  className="
                     w-full
                     pl-10
                     pr-3
@@ -400,43 +335,41 @@ export default function Register() {
                     focus:ring-2
                     focus:ring-emerald-500
                   "
-                                />
+                />
 
-                            </div>
-                        )}
+              </div>
+            )}
 
-                        {/* PASSWORD */}
+            <div className="relative">
 
-                        <div className="relative">
-
-                            <Lock
-                                className="
+              <Lock
+                className="
                   absolute
                   left-3
                   top-3
                   text-gray-400
                 "
-                                size={16}
-                            />
+                size={16}
+              />
 
-                            <input
-                                type={
-                                    showPassword
-                                        ? "text"
-                                        : "password"
-                                }
+              <input
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
 
-                                value={password}
+                value={password}
 
-                                onChange={(e) =>
-                                    setPassword(
-                                        e.target.value
-                                    )
-                                }
+                onChange={(e) =>
+                  setPassword(
+                    e.target.value
+                  )
+                }
 
-                                placeholder="Password"
+                placeholder="Password"
 
-                                className="
+                className="
                   w-full
                   pl-10
                   pr-10
@@ -449,68 +382,68 @@ export default function Register() {
                   focus:ring-2
                   focus:ring-emerald-500
                 "
-                            />
+              />
 
-                            <button
-                                type="button"
+              <button
+                type="button"
 
-                                onClick={() =>
-                                    setShowPassword(
-                                        !showPassword
-                                    )
-                                }
+                onClick={() =>
+                  setShowPassword(
+                    !showPassword
+                  )
+                }
 
-                                className="
+                className="
                   absolute
                   right-3
                   top-2
                   text-gray-400
                   hover:text-white
                 "
-                            >
+              >
 
-                                {showPassword ? (
-                                    <EyeOff
-                                        size={16}
-                                    />
-                                ) : (
-                                    <Eye
-                                        size={16}
-                                    />
-                                )}
+                {showPassword ? (
+                  <EyeOff
+                    size={16}
+                  />
+                ) : (
+                  <Eye
+                    size={16}
+                  />
+                )}
 
-                            </button>
+              </button>
 
-                        </div>
+            </div>
 
-                        {/* CONFIRM PASSWORD */}
+            <div className="relative">
 
-                        <div className="relative">
-
-                            <Lock
-                                className="
+              <Lock
+                className="
                   absolute
                   left-3
                   top-3
                   text-gray-400
                 "
-                                size={16}
-                            />
+                size={16}
+              />
 
-                            <input
-                                type="password"
+              <input
+                type="password"
 
-                                value={confirmPassword}
+                value={
+                  confirmPassword
+                }
 
-                                onChange={(e) =>
-                                    setConfirmPassword(
-                                        e.target.value
-                                    )
-                                }
+                onChange={(e) =>
+                  setConfirmPassword(
+                    e.target.value
+                  )
+                }
 
-                                placeholder="Confirm Password"
+                placeholder="Confirm Password"
 
-                                className="
+                className="
                   w-full
                   pl-10
                   pr-3
@@ -523,18 +456,18 @@ export default function Register() {
                   focus:ring-2
                   focus:ring-emerald-500
                 "
-                            />
+              />
 
-                        </div>
+            </div>
 
-                        {/* REGISTER BUTTON */}
+            <button
+              onClick={
+                handleRegister
+              }
 
-                        <button
-                            onClick={handleRegister}
+              disabled={loading}
 
-                            disabled={loading}
-
-                            className={`
+              className={`
                 mt-3
                 py-2
                 rounded-xl
@@ -542,62 +475,61 @@ export default function Register() {
                 transition-all
 
                 ${loading
-                                    ? `
+                  ? `
                     bg-gray-500
                     cursor-not-allowed
                   `
-                                    : `
+                  : `
                     bg-gradient-to-r
                     from-emerald-500
                     to-green-600
                     hover:opacity-90
                     shadow-md
                   `
-                                }
+                }
               `}
-                        >
+            >
 
-                            {loading
-                                ? "Creating account..."
-                                : "Register"}
+              {loading
+                ? "Creating account..."
+                : "Register"}
 
-                        </button>
+            </button>
 
-                        {/* LOGIN */}
-
-                        <p
-                            className="
+            <p
+              className="
                 text-sm
                 text-center
                 text-gray-400
                 mt-2
               "
-                        >
+            >
 
-                            Already have an account?{" "}
+              Already have an account?{" "}
 
-                            <span
-                                className="
+              <span
+                className="
                   text-emerald-400
                   cursor-pointer
                   hover:underline
                 "
 
-                                onClick={() =>
-                                (
-                                    window.location.href =
-                                    "/login"
-                                )
-                                }
-                            >
-                                Login
-                            </span>
+                onClick={() => (
+                  window.location.href =
+                  "/login"
+                )}
+              >
+                Login
+              </span>
 
-                        </p>
+            </p>
 
-                    </div>
-                </div>
-            </motion.div>
+          </div>
+
         </div>
-    );
+
+      </motion.div>
+
+    </div>
+  );
 }

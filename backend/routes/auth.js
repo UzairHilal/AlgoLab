@@ -1,14 +1,18 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
 
 import User from "../models/User.js";
+
+dotenv.config();
 
 const router = express.Router();
 
 // ================= REGISTER =================
 
 router.post("/register", async (req, res) => {
+
   try {
 
     const {
@@ -18,85 +22,113 @@ router.post("/register", async (req, res) => {
       role
     } = req.body;
 
+    // ================= VALIDATION =================
 
     if (!fullName || !password || !role) {
+
       return res.status(400).json({
         msg: "Missing required fields"
       });
+
     }
 
     if (
       role === "student" &&
       !rollNumber
     ) {
+
       return res.status(400).json({
         msg: "Roll number is required for students"
       });
+
     }
 
+    // ================= CHECK EXISTING =================
 
     let existingUser = null;
 
     if (role === "student") {
 
-      existingUser = await User.findOne({
-        rollNumber: rollNumber.toUpperCase()
-      });
+      existingUser =
+        await User.findOne({
+          rollNumber:
+            rollNumber.toUpperCase()
+        });
 
     } else {
 
-      existingUser = await User.findOne({
-        fullName
-      });
+      existingUser =
+        await User.findOne({
+          fullName
+        });
 
     }
 
     if (existingUser) {
+
       return res.status(400).json({
         msg: "User already exists"
       });
+
     }
 
+=
+    const hashed =
+      await bcrypt.hash(
+        password,
+        10
+      );
 
-    const hashed = await bcrypt.hash(
-      password,
-      10
-    );
 
+    const user =
+      await User.create({
 
-    const user = await User.create({
-      fullName,
+        fullName,
 
-      rollNumber:
-        role === "student"
-          ? rollNumber.toUpperCase()
-          : undefined,
+        rollNumber:
+          role === "student"
+            ? rollNumber.toUpperCase()
+            : undefined,
 
-      password: hashed,
+        password: hashed,
 
-      role
-    });
+        role
+      });
 
+    // ================= JWT =================
 
     const token = jwt.sign(
       {
         id: user._id,
         role: user.role
       },
+
       process.env.SECRET_KEY,
+
       {
         expiresIn: "7d"
       }
     );
 
+  
     res.json({
+
       token,
+
       role: user.role,
+
       user: {
+
         id: user._id,
-        fullName: user.fullName,
-        rollNumber: user.rollNumber,
-        role: user.role
+
+        fullName:
+          user.fullName,
+
+        rollNumber:
+          user.rollNumber,
+
+        role:
+          user.role
       }
     });
 
@@ -107,80 +139,110 @@ router.post("/register", async (req, res) => {
     res.status(500).json({
       msg: "Server error"
     });
+
   }
 });
 
 
-// LOGIN
+
 router.post("/login", async (req, res) => {
 
-  const {
-    rollNumber,
-    fullName,
-    password
-  } = req.body;
+  try {
 
-  let user = null;
+    const {
+      rollNumber,
+      fullName,
+      password
+    } = req.body;
 
-  // ================= STUDENT LOGIN =================
+    let user = null;
 
-  if (rollNumber) {
+    // ================= STUDENT LOGIN =================
 
-    user = await User.findOne({
-      rollNumber: rollNumber.toUpperCase()
-    });
+    if (rollNumber) {
 
-  }
+      user = await User.findOne({
+        rollNumber:
+          rollNumber.toUpperCase()
+      });
 
-  // ================= ADMIN LOGIN =================
-
-  else if (fullName) {
-
-    user = await User.findOne({
-      fullName
-    });
-
-  }
-
-  if (!user) {
-    return res.status(400).json({
-      msg: "User not found"
-    });
-  }
-
-  const match = await bcrypt.compare(
-    password,
-    user.password
-  );
-
-  if (!match) {
-
-    return res.status(400).json({
-      msg: "Wrong password"
-    });
-
-  }
-
-  const token = jwt.sign(
-    {
-      id: user._id,
-      role: user.role
-    },
-    process.env.SECRET_KEY,
-    {
-      expiresIn: "7d"
     }
-  );
 
-  res.json({
-    token,
-    role: user.role,
-    user: {
-      fullName: user.fullName,
-      rollNumber: user.rollNumber,
-      role: user.role
+    // ================= ADMIN LOGIN =================
+
+    else if (fullName) {
+
+      user = await User.findOne({
+        fullName
+      });
+
     }
-  });
+
+    if (!user) {
+
+      return res.status(400).json({
+        msg: "User not found"
+      });
+
+    }
+
+    const match =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
+
+    if (!match) {
+
+      return res.status(400).json({
+        msg: "Wrong password"
+      });
+
+    }
+
+  
+    const token = jwt.sign(
+
+      {
+        id: user._id,
+        role: user.role
+      },
+
+      process.env.SECRET_KEY,
+
+      {
+        expiresIn: "7d"
+      }
+    );
+
+    res.json({
+
+      token,
+
+      role: user.role,
+
+      user: {
+
+        fullName:
+          user.fullName,
+
+        rollNumber:
+          user.rollNumber,
+
+        role:
+          user.role
+      }
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      msg: "Server error"
+    });
+
+  }
 });
 
 export default router;

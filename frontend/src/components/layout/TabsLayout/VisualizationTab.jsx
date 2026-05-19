@@ -1,82 +1,6 @@
 import { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
-// 🔁 CHANGE THIS DATA TO TEST
-
-// Palindrome
-// const steps = [
-//   {
-//     array: ["M", "A", "D", "A", "M"],
-//     active: [0, 4],
-//     found: false,
-//     message: "Compare M and M",
-//   },
-//   {
-//     array: ["M", "A", "D", "A", "M"],
-//     active: [0, 4],
-//     found: true,
-//     message: "Match",
-//   },
-//   {
-//     array: ["M", "A", "D", "A", "M"],
-//     active: [1, 3],
-//     found: false,
-//     message: "Compare A and A",
-//   },
-//   {
-//     array: ["M", "A", "D", "A", "M"],
-//     active: [1, 3],
-//     found: true,
-//     message: "Match",
-//   },
-//   {
-//     array: ["M", "A", "D", "A", "M"],
-//     active: [2],
-//     found: true,
-//     message: "Palindrome confirmed",
-//   },
-// ];
-
-// ✅ Bubble Sort Example (uncomment to test)
-// const steps = [
-//   { array: [4,7,2,9], active: [0,1], found: false, message: "Compare 4 & 7" },
-//   { array: [4,7,2,9], active: [1,2], found: false, message: "Compare 7 & 2" },
-//   { array: [4,2,7,9], active: [1,2], found: true, message: "Swap 7 & 2" },
-//   { array: [4,2,7,9], active: [2,3], found: false, message: "Compare 7 & 9" },
-//   { array: [4,2,7,9], active: [3], found: true, message: "9 fixed" },
-// ];
-
-// Linear search
-// const steps = [
-//   { array: [3, 8, 7, 10], active: [0], found: false, message: "Is 3 === 7? No." },
-//   { array: [3, 8, 7, 10], active: [1], found: false, message: "Is 8 === 7? No." },
-//   { array: [3, 8, 7, 10], active: [2], found: true, message: "Found 7 at index 2!" },
-// ];
-
-// Binary Search
-// const steps = [
-//   { array: [2, 5, 8, 12, 18, 25, 30], active: [0, 1, 2, 3, 4, 5, 6], found: false, message: "Initial Range" },
-//   { array: [2, 5, 8, 12, 18, 25, 30], active: [3], found: false, message: "Check middle: 12. Too low!" },
-//   { array: [2, 5, 8, 12, 18, 25, 30], active: [4, 5, 6], found: false, message: "New range: Right side" },
-//   { array: [2, 5, 8, 12, 18, 25, 30], active: [5], found: false, message: "Check middle: 25. Too high!" },
-//   { array: [2, 5, 8, 12, 18, 25, 30], active: [4], found: true, message: "Found 18!" },
-// ];
-
-// Two Sum Problem
-// const steps = [
-//   {
-//     array: [2, 11, 7, 15],
-//     active: [0, 1],
-//     found: false,
-//     message: "2 + 11 = 13 (Target 9)",
-//   },
-//   {
-//     array: [2, 11, 7, 15],
-//     active: [0, 2],
-//     found: true,
-//     message: "2 + 7 = 9. Match Found!",
-//   },
-// ];
 
 const stepsLoadFail = [
   {
@@ -110,11 +34,11 @@ const VisualiztionTab = ({ algo }) => {
     return () => clearInterval(id);
   });
 
-  useEffect(() => {
-    step.found ? toast.success(step.message) : toast.error(step.message);
+  // useEffect(() => {
+  //   step.found ? toast.success(step.message) : toast.error(step.message);
 
-    return () => {i >= steps.length - 1 && toast.dismissAll()};
-  });
+  //   return () => {i >= steps.length - 1 && toast.dismissAll()};
+  // });
 
   return (
     <div>

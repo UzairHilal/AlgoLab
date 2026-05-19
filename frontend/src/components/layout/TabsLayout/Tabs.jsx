@@ -4,19 +4,12 @@ import React from "react";
 import toast from "react-hot-toast";
 
 function Tabs({ activeTab, setActiveTab, markAsRead }) {
-  // const handleTabChange = (tab) => {
-  //     if (!markAsRead && tab !== "info") {
-  //         toast.error("Complete Info tab first to unlock other sections.")
-  //         return;
-  //     }
-  //     setActiveTab(tab)
-  // }
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
   return (
-    <div className="w-full flex gap-2  p-2 ">
+    <div className="w-full flex gap-2  p-2  overflow-x-auto">
       <Button
         onClick={() => handleTabChange("info")}
         className={

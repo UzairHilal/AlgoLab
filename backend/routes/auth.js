@@ -1,76 +1,186 @@
 import express from "express";
-import fs from "fs";
-import path from "path";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { fileURLToPath } from "url";
-
 
 import User from "../models/User.js";
 
 const router = express.Router();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const filePath = path.join(__dirname, "../data/users.json");
+// ================= REGISTER =================
 
 router.post("/register", async (req, res) => {
   try {
 
-    const { username, password, role } = req.body;
+    const {
+      fullName,
+      rollNumber,
+      password,
+      role
+    } = req.body;
 
-   
-    const existing = await User.findOne({ username });
-    if (existing) {
-      return res.status(400).json({ msg: "User already exists" });
+
+    if (!fullName || !password || !role) {
+      return res.status(400).json({
+        msg: "Missing required fields"
+      });
     }
 
-  
-    const hashed = await bcrypt.hash(password, 10);
+    if (
+      role === "student" &&
+      !rollNumber
+    ) {
+      return res.status(400).json({
+        msg: "Roll number is required for students"
+      });
+    }
+
+
+    let existingUser = null;
+
+    if (role === "student") {
+
+      existingUser = await User.findOne({
+        rollNumber: rollNumber.toUpperCase()
+      });
+
+    } else {
+
+      existingUser = await User.findOne({
+        fullName
+      });
+
+    }
+
+    if (existingUser) {
+      return res.status(400).json({
+        msg: "User already exists"
+      });
+    }
+
+
+    const hashed = await bcrypt.hash(
+      password,
+      10
+    );
+
 
     const user = await User.create({
-      username,
+      fullName,
+
+      rollNumber:
+        role === "student"
+          ? rollNumber.toUpperCase()
+          : undefined,
+
       password: hashed,
-      role: role || "student"
+
+      role
     });
 
-    user.save()
+
     const token = jwt.sign(
-      { id: user._id, role: user.role },
-      "secret123",
-      { expiresIn: "7d" }
+      {
+        id: user._id,
+        role: user.role
+      },
+      process.env.SECRET_KEY,
+      {
+        expiresIn: "7d"
+      }
     );
 
     res.json({
       token,
-      role: user.role
+      role: user.role,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        rollNumber: user.rollNumber,
+        role: user.role
+      }
     });
 
   } catch (err) {
+
     console.error(err);
-    res.status(500).json({ msg: "Server error" });
+
+    res.status(500).json({
+      msg: "Server error"
+    });
   }
 });
 
 
 // LOGIN
 router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
 
-  const user = await User.findOne({username})
+  const {
+    rollNumber,
+    fullName,
+    password
+  } = req.body;
 
-  if (!user) return res.status(400).json({ msg: "User not found" });
+  let user = null;
 
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.status(400).json({ msg: "Wrong password" });
+  // ================= STUDENT LOGIN =================
 
-  const token = jwt.sign(
-    { id: user.id, role: user.role },
-    "secret123"
+  if (rollNumber) {
+
+    user = await User.findOne({
+      rollNumber: rollNumber.toUpperCase()
+    });
+
+  }
+
+  // ================= ADMIN LOGIN =================
+
+  else if (fullName) {
+
+    user = await User.findOne({
+      fullName
+    });
+
+  }
+
+  if (!user) {
+    return res.status(400).json({
+      msg: "User not found"
+    });
+  }
+
+  const match = await bcrypt.compare(
+    password,
+    user.password
   );
 
-  res.json({ token, role: user.role });
+  if (!match) {
+
+    return res.status(400).json({
+      msg: "Wrong password"
+    });
+
+  }
+
+  const token = jwt.sign(
+    {
+      id: user._id,
+      role: user.role
+    },
+    process.env.SECRET_KEY,
+    {
+      expiresIn: "7d"
+    }
+  );
+
+  res.json({
+    token,
+    role: user.role,
+    user: {
+      fullName: user.fullName,
+      rollNumber: user.rollNumber,
+      role: user.role
+    }
+  });
 });
 
 export default router;

@@ -79,9 +79,33 @@ function StudentDetails() {
         p-6
       ">
 
-        <h1 className="text-3xl font-bold">
+        {/* <h1 className="text-3xl font-bold">
           {data.student.username}
-        </h1>
+        </h1> */}
+        <div className="flex flex-col gap-2">
+
+          <h1 className="text-3xl font-bold">
+            {data.student.fullName}
+          </h1>
+
+          <div className="flex items-center gap-3 text-sm text-gray-400">
+
+            <span>
+              Roll No:
+            </span>
+
+            <span className="
+      px-3 py-1 rounded-lg
+      bg-white/5
+      border border-white/10
+      text-white
+    ">
+              {data.student.rollNumber}
+            </span>
+
+          </div>
+
+        </div>
 
         <p className="text-gray-400 mt-1">
           Student Progress Monitoring

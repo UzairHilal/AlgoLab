@@ -11,7 +11,7 @@ import {
 
 const router = express.Router();
 
-router.get("/",authMiddleware,adminOnly,
+router.get("/", authMiddleware, adminOnly,
   async (req, res) => {
 
     try {
@@ -39,8 +39,11 @@ router.get("/",authMiddleware,adminOnly,
 
             id: student._id,
 
-            username:
-              student.username,
+            fullName:
+              student.fullName,
+
+            rollNumber:
+              student.rollNumber,
 
             completedCount:
               progress.length,
@@ -49,11 +52,11 @@ router.get("/",authMiddleware,adminOnly,
               totalAlgorithms === 0
                 ? 0
                 : Math.round(
-                    (
-                      progress.length /
-                      totalAlgorithms
-                    ) * 100
-                  ),
+                  (
+                    progress.length /
+                    totalAlgorithms
+                  ) * 100
+                ),
 
             latestAlgorithm:
               progress[0]?.algorithmSlug ||
@@ -80,17 +83,16 @@ router.get("/",authMiddleware,adminOnly,
   }
 );
 
-router.get("/:id",
+router.get(
+  "/:id",
   authMiddleware,
   adminOnly,
   async (req, res) => {
+
     try {
 
-        const id = req.params.id
-
-        // console.log(`recived id: ${id}`)
-      const student = await User.findById(req.params.id)
-        .select("-password");
+      const student =
+        await User.findById(req.params.id).select("-password");
 
       if (!student) {
         return res.status(404).json({
@@ -113,31 +115,41 @@ router.get("/:id",
         completedSlugs.includes(algo.slug)
       );
 
-      const pending = algorithms.filter(
-        (algo) => !completedSlugs.includes(algo.slug)
-      );
+      const pending =
+        algorithms.filter(
+          (algo) =>
+            !completedSlugs.includes(
+              algo.slug
+            )
+        );
 
       const progressPercent =
         algorithms.length === 0
           ? 0
           : Math.round(
-              (completed.length / algorithms.length) * 100
-            );
+            (
+              completed.length /
+              algorithms.length
+            ) * 100
+          );
 
       res.json({
         student,
-        totalAlgorithms: algorithms.length,
+        totalAlgorithms:
+          algorithms.length,
         completed,
         pending,
         progressPercent
       });
 
     } catch (err) {
+
       console.error(err);
 
       res.status(500).json({
         msg: "Server error"
       });
+
     }
   }
 );

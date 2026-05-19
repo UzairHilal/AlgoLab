@@ -1,4 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState
+} from "react";
 
 import { apiFetch } from "@/utils/api";
 
@@ -8,6 +11,7 @@ import {
   ChevronRight,
   ChevronLeft
 } from "lucide-react";
+
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -58,8 +62,17 @@ function AdminStudents() {
 
   const filteredStudents =
     students.filter((student) =>
-      student.username
+
+      student.fullName
         .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+
+      ||
+
+      student.rollNumber
+        ?.toLowerCase()
         .includes(
           search.toLowerCase()
         )
@@ -87,14 +100,18 @@ function AdminStudents() {
 
       <Button
         onClick={() => navigate("/admin")}
-        className="max-w-fit px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20"
+        className="
+          max-w-fit
+          px-4
+          py-2
+          rounded-xl
+          bg-white/10
+          hover:bg-white/20
+        "
       >
         <ChevronLeft size={16} />
         Back
       </Button>
-
-      {/* HEADER */}
-
 
       <div>
 
@@ -134,7 +151,7 @@ function AdminStudents() {
 
         <input
           type="text"
-          placeholder="Search students..."
+          placeholder="Search by name or roll number..."
           value={search}
           onChange={(e) =>
             setSearch(e.target.value)
@@ -167,7 +184,7 @@ function AdminStudents() {
 
         <div className="
           grid
-          grid-cols-4
+          grid-cols-5
           gap-4
           px-6
           py-4
@@ -179,6 +196,7 @@ function AdminStudents() {
         ">
 
           <div>Student</div>
+          <div>Roll No.</div>
           <div>Progress</div>
           <div>Completed</div>
           <div>Latest</div>
@@ -198,53 +216,58 @@ function AdminStudents() {
               <div
                 key={i}
                 className="
-                grid
-                grid-cols-4
-                gap-4
-                px-6
-                py-5
-                border-b
-                border-white/5
-                hover:bg-white/5
-                cursor-pointer hover:scale-[1.02] transition
-              "
-              onClick={() => navigate(`/admin/students/${student.id}`)}  
+                  grid
+                  grid-cols-5
+                  gap-4
+                  px-6
+                  py-5
+                  border-b
+                  border-white/5
+                  hover:bg-white/5
+                  cursor-pointer
+                  hover:scale-[1.01]
+                  transition
+                "
+                onClick={() =>
+                  navigate(
+                    `/admin/students/${student.id}`
+                  )
+                }
               >
 
                 {/* STUDENT */}
 
                 <div className="
-                flex
-                items-center
-                gap-3
-              "
-                              >
-
-                  <div className="
-                  w-10
-                  h-10
-                  rounded-full
-                  bg-emerald-500/10
                   flex
                   items-center
-                  justify-center
-                  text-emerald-400
+                  gap-3
                 ">
+
+                  <div className="
+                    w-10
+                    h-10
+                    rounded-full
+                    bg-emerald-500/10
+                    flex
+                    items-center
+                    justify-center
+                    text-emerald-400
+                  ">
                     <User size={18} />
                   </div>
 
                   <div>
 
                     <p className="
-                    font-medium
-                  ">
-                      {student.username}
+                      font-medium
+                    ">
+                      {student.fullName}
                     </p>
 
                     <p className="
-                    text-xs
-                    text-gray-500
-                  ">
+                      text-xs
+                      text-gray-500
+                    ">
                       Student
                     </p>
 
@@ -252,22 +275,33 @@ function AdminStudents() {
 
                 </div>
 
+                {/* ROLL NUMBER */}
+
+                <div className="
+                  flex
+                  items-center
+                  text-sm
+                  text-gray-300
+                ">
+                  {student.rollNumber}
+                </div>
+
                 {/* PROGRESS */}
 
                 <div className="
-                flex
-                flex-col
-                justify-center
-                gap-2
-              ">
+                  flex
+                  flex-col
+                  justify-center
+                  gap-2
+                ">
 
                   <div className="
-                  w-full
-                  h-2
-                  rounded-full
-                  bg-black/30
-                  overflow-hidden
-                ">
+                    w-full
+                    h-2
+                    rounded-full
+                    bg-black/30
+                    overflow-hidden
+                  ">
 
                     <div
                       style={{
@@ -275,19 +309,19 @@ function AdminStudents() {
                           `${student.percentage}%`
                       }}
                       className="
-                      h-full
-                      bg-gradient-to-r
-                      from-emerald-500
-                      to-green-400
-                    "
+                        h-full
+                        bg-gradient-to-r
+                        from-emerald-500
+                        to-green-400
+                      "
                     />
 
                   </div>
 
                   <p className="
-                  text-xs
-                  text-gray-400
-                ">
+                    text-xs
+                    text-gray-400
+                  ">
                     {student.percentage}%
                   </p>
 
@@ -296,24 +330,25 @@ function AdminStudents() {
                 {/* COMPLETED */}
 
                 <div className="
-                flex
-                items-center
-                text-sm
-              ">
+                  flex
+                  items-center
+                  text-sm
+                ">
 
                   {student.completedCount}
-                  {" "}algorithms
+                  {" "}
+                  algorithms
 
                 </div>
 
                 {/* LATEST */}
 
                 <div className="
-                flex
-                items-center
-                justify-between
-                text-sm
-              ">
+                  flex
+                  items-center
+                  justify-between
+                  text-sm
+                ">
 
                   <span>
                     {student.latestAlgorithm}
@@ -322,8 +357,8 @@ function AdminStudents() {
                   <ChevronRight
                     size={16}
                     className="
-                    text-gray-500
-                  "
+                      text-gray-500
+                    "
                   />
 
                 </div>

@@ -16,6 +16,9 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
@@ -38,7 +41,7 @@ app.use("/api/submissions", submissionRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/progress", progressRoute)
 app.use("/api/admin", adminRoutes);
-app.use("/api/admin/students",adminStudentsRoutes);
+app.use("/api/admin/students", adminStudentsRoutes);
 
 app.use((req, res) => {
   res.sendFile(

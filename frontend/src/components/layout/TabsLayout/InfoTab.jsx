@@ -4,7 +4,7 @@ import ComplexityGraph from './ComplexityGraph';
 
 function InfoTab({ algo }) {
 useEffect(()=>{
-console.log("algo in info tab: ", algo)
+// console.log("algo in info tab: ", algo)
 },[])
     if (!algo) {
         return <div className="text-gray-400 text-center py-10">Loading...</div>;

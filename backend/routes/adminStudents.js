@@ -88,7 +88,7 @@ router.get("/:id",
 
         const id = req.params.id
 
-        console.log(`recived id: ${id}`)
+        // console.log(`recived id: ${id}`)
       const student = await User.findById(req.params.id)
         .select("-password");
 

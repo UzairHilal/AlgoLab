@@ -83,7 +83,7 @@ router.get(
           algorithmSlug: req.params.slug
         });
 
-        console.log("Submission: ", submission)
+        // console.log("Submission: ", submission)
       res.json({
         success: true,
         submission

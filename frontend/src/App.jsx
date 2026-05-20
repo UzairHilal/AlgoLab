@@ -97,9 +97,9 @@ export default function App() {
           "
         >
 
-          {role === "student" && (
+          {/* {role === "student" && (
             <StudentTabs />
-          )}
+          )} */}
 
         </div>
 
@@ -228,11 +228,7 @@ function StudentTabs() {
   return (
 
     <div
-      className="
-        flex
-        gap-2
-        px-4
-        py-3
+      className=" flex gap-2 px-4 py-3
       "
     >
 

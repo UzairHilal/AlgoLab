@@ -15,85 +15,116 @@ function Tabs({
   markAsRead
 }) {
 
-  const handleTabChange = (
-    tab
-  ) => {
-
+  const handleTabChange = (tab) => {
     setActiveTab(tab);
-
   };
+
+  const tabs = [
+    {
+      id: "info",
+      label: "Info",
+      icon: Text
+    },
+    {
+      id: "flow",
+      label: "FlowChart",
+      icon: ChartSpline
+    },
+    {
+      id: "visual",
+      label: "Visualization",
+      icon: SquarePlay
+    },
+    {
+      id: "code",
+      label: "Code Editor",
+      icon: Code
+    }
+  ];
 
   return (
 
-    <div
-      className="
-        w-full
-        flex
-        gap-2
-        p-2
-        overflow-x-auto
-      "
-    >
+    <div className="w-full flex gap-2 overflow-x-auto scrollbar-hide">
 
-      <Button
-        onClick={() =>
-          handleTabChange("info")
-        }
-        className={
-          activeTab === "info"
-            ? "bg-[var(--bg-secondary)] border-blue-200/80"
-            : ""
-        }
-      >
+      {tabs.map((tab) => {
 
-        Info <Text />
+        const Icon = tab.icon;
 
-      </Button>
+        const active =
+          activeTab === tab.id;
 
-      <Button
-        onClick={() =>
-          handleTabChange("flow")
-        }
-        className={
-          activeTab === "flow"
-            ? "bg-[var(--bg-secondary)] border-blue-200/80"
-            : ""
-        }
-      >
+        return (
 
-        FlowChart <ChartSpline />
+          <Button
+            key={tab.id}
 
-      </Button>
+            onClick={() =>
+              handleTabChange(tab.id)
+            }
 
-      <Button
-        onClick={() =>
-          handleTabChange("visual")
-        }
-        className={
-          activeTab === "visual"
-            ? "bg-[var(--bg-secondary)] border-blue-200/80"
-            : ""
-        }
-      >
+            className={`
+              relative
+              flex items-center gap-2
+              px-4 py-2
+              rounded-xl
+              border
+              text-sm font-medium
+              whitespace-nowrap
+              transition-all duration-300
 
-        Visualization <SquarePlay />
+              ${active
+                ? `
+                  bg-gradient-to-r
+                  from-emerald-500/20
+                  to-cyan-500/20
+                  border-emerald-400/40
+                  text-white
+                  shadow-lg shadow-emerald-500/10
+                  backdrop-blur-xl
+                `
+                : `
+                  bg-white/[0.03]
+                  border-white/10
+                  text-gray-400
+                  hover:bg-white/[0.06]
+                  hover:text-white
+                  hover:border-white/20
+                `
+              }
+            `}
+          >
 
-      </Button>
+            {active && (
+              <div
+                className="
+                  absolute inset-0
+                  rounded-xl
+                  bg-gradient-to-r
+                  from-emerald-500/5
+                  to-cyan-500/5
+                  pointer-events-none
+                "
+              />
+            )}
 
-      <Button
-        onClick={() =>
-          handleTabChange("code")
-        }
-        className={
-          activeTab === "code"
-            ? "bg-[var(--bg-secondary)] border-blue-200/80"
-            : ""
-        }
-      >
+            <Icon
+              size={16}
+              className={`
+                transition-transform duration-300
+                ${active
+                  ? "scale-110 text-emerald-300"
+                  : ""
+                }
+              `}
+            />
 
-        CodeEditor <Code />
+            <span>
+              {tab.label}
+            </span>
 
-      </Button>
+          </Button>
+        );
+      })}
 
     </div>
   );

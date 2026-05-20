@@ -1,7 +1,9 @@
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from "motion/react"
+
 import { Input } from '../ui/input'
 import { Button } from "../ui/button"
+
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,289 +12,1168 @@ import {
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
-import { Filter, Search, Sparkles, Trophy } from 'lucide-react'
+
+import {
+    Filter,
+    Search,
+    Sparkles,
+    Trophy,
+    Flame,
+    ChevronRight,
+    BrainCircuit,
+    Rocket,
+    Star
+} from 'lucide-react'
+
 import AlgoBox from './AlgoBox'
+
 import { apiFetch } from '@/utils/api'
-import { useParams } from 'react-router-dom'
 
 function AlgoDashboard() {
-    const [Category, setCategory] = useState("All")
-    const [search, setSearch] = useState("")
-    const [debouncedSearch, setDebouncedSearch] = useState("")
 
-    const [algos, setAlgos] = useState([])
-    const [completedAlgos, setCompletedAlgos] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const [Category, setCategory] =
+        useState("All");
 
+    const [search, setSearch] =
+        useState("");
 
+    const [
+        debouncedSearch,
+        setDebouncedSearch
+    ] = useState("");
+
+    const [algos, setAlgos] =
+        useState([]);
+
+    const [
+        completedAlgos,
+        setCompletedAlgos
+    ] = useState([]);
+
+    const [loading, setLoading] =
+        useState(true);
+
+    const [error, setError] =
+        useState(null);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Fetch all algorithms
-                const algosRes = await apiFetch("algorithms");
-                const algosData = await algosRes.json()
 
-                // Fetch user's completed progress
-                const progressRes = await apiFetch("progress/user-progress");
-                const progressData = await progressRes.json()
+        const fetchData =
+            async () => {
 
-                console.log("Progress response:", progressData);
+                try {
 
-                const progressArray = Array.isArray(progressData) ? progressData : [];
+                    const algosRes =
+                        await apiFetch(
+                            "algorithms"
+                        );
 
-                const completed = progressArray
-                    .filter(p => p.completed)
-                    .map(p => p.algorithmSlug);
+                    const algosData =
+                        await algosRes.json();
 
+                    const progressRes =
+                        await apiFetch(
+                            "progress/user-progress"
+                        );
 
-                console.log("Completed algorithms:", completed);
-                setCompletedAlgos(completed);
+                    const progressData =
+                        await progressRes.json();
 
-                // Sort algorithms by order
-                const sortedAlgos = Array.isArray(algosData) ? [...algosData] : [];
-                sortedAlgos.sort((a, b) => (a.order || 999) - (b.order || 999));
+                    const progressArray =
+                        Array.isArray(progressData)
+                            ? progressData
+                            : [];
 
-                const algosWithUnlockStatus = sortedAlgos.map((algo, index, sortedArray) => {
-                    let unlocked = false;
+                    const completed =
+                        progressArray
+                            .filter(
+                                (p) => p.completed
+                            )
+                            .map(
+                                (p) => p.algorithmSlug
+                            );
 
-                    if (index === 0) {
-                        unlocked = true;
-                    } else {
-                        // Check if previous algorithm is completed
-                        const prevAlgo = sortedArray[index - 1];
-                        unlocked = completed.includes(prevAlgo.slug);
-                    }
+                    setCompletedAlgos(
+                        completed
+                    );
 
-                    return {
-                        ...algo,
-                        unlocked,
-                        isCompleted: completed.includes(algo.slug)
-                    };
-                });
+                    const sortedAlgos =
+                        Array.isArray(algosData)
+                            ? [...algosData]
+                            : [];
 
-                setAlgos(algosWithUnlockStatus);
-            } catch (err) {
-                console.error("Fetch error:", err);
-                setError("Failed to load algorithms");
-            } finally {
-                setLoading(false);
-            }
-        };
+                    sortedAlgos.sort(
+                        (a, b) =>
+                            (a.order || 999) -
+                            (b.order || 999)
+                    );
+
+                    const algosWithUnlockStatus =
+                        sortedAlgos.map(
+                            (
+                                algo,
+                                index,
+                                sortedArray
+                            ) => {
+
+                                let unlocked =
+                                    false;
+
+                                if (index === 0) {
+
+                                    unlocked = true;
+
+                                } else {
+
+                                    const prevAlgo =
+                                        sortedArray[index - 1];
+
+                                    unlocked =
+                                        completed.includes(
+                                            prevAlgo.slug
+                                        );
+                                }
+
+                                return {
+                                    ...algo,
+                                    unlocked,
+                                    isCompleted:
+                                        completed.includes(
+                                            algo.slug
+                                        )
+                                };
+                            }
+                        );
+
+                    setAlgos(
+                        algosWithUnlockStatus
+                    );
+
+                } catch (err) {
+
+                    console.error(
+                        "Fetch error:",
+                        err
+                    );
+
+                    setError(
+                        "Failed to load algorithms"
+                    );
+
+                } finally {
+
+                    setLoading(false);
+
+                }
+            };
 
         fetchData();
+
     }, []);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(search);
-        }, 300);
-        return () => clearTimeout(timer);
+
+        const timer =
+            setTimeout(() => {
+
+                setDebouncedSearch(
+                    search
+                );
+
+            }, 300);
+
+        return () =>
+            clearTimeout(timer);
+
     }, [search]);
 
     const categories = [
         "All",
-        ...new Set(algos.map((algo) => algo.category).filter(Boolean))
+        ...new Set(
+            algos
+                .map(
+                    (algo) =>
+                        algo.category
+                )
+                .filter(Boolean)
+        )
     ];
 
-    const filteredAlgos = algos.filter((algo) => {
-        const matchCategory =
-            Category === "All" || algo.category === Category;
+    const filteredAlgos =
+        algos.filter((algo) => {
 
-        const matchSearch =
-            (algo.title || "")
-                .toLowerCase()
-                .includes(debouncedSearch.toLowerCase()) ||
-            (algo.theory?.description || "")
-                .toLowerCase()
-                .includes(debouncedSearch.toLowerCase());
+            const matchCategory =
+                Category === "All" ||
+                algo.category === Category;
 
-        return matchCategory && matchSearch;
-    });
+            const matchSearch =
+                (
+                    algo.title || ""
+                )
+                    .toLowerCase()
+                    .includes(
+                        debouncedSearch.toLowerCase()
+                    ) ||
 
-    const completedCount = algos.filter(a => a.isCompleted).length;
-    const totalCount = algos.length;
-    const progressPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+                (
+                    algo.theory?.description || ""
+                )
+                    .toLowerCase()
+                    .includes(
+                        debouncedSearch.toLowerCase()
+                    );
 
-    const nextToUnlock = algos.find(algo => !algo.unlocked && !algo.isCompleted);
+            return (
+                matchCategory &&
+                matchSearch
+            );
+        });
+
+    const completedCount =
+        algos.filter(
+            (a) => a.isCompleted
+        ).length;
+
+    const totalCount =
+        algos.length;
+
+    const progressPercentage =
+        totalCount > 0
+            ? (
+                completedCount /
+                totalCount
+            ) * 100
+            : 0;
+
+    const nextToUnlock =
+        algos.find(
+            (algo) =>
+                !algo.unlocked &&
+                !algo.isCompleted
+        );
 
     if (error) {
+
         return (
-            <div className="text-red-400 text-center mt-20 text-lg font-medium">
+
+            <div
+                className="
+                    text-red-400
+                    text-center
+                    mt-20
+                    text-lg
+                    font-medium
+                "
+            >
                 {error}
             </div>
+
         );
     }
 
     if (loading) {
+
         return (
-            <div className="text-gray-400 text-center mt-20 animate-pulse">
-                Loading algorithms...
+
+            <div
+                className="
+                    flex
+                    flex-col
+                    items-center
+                    justify-center
+                    py-24
+                    gap-5
+                "
+            >
+
+                <motion.div
+                    animate={{
+                        rotate: 360
+                    }}
+
+                    transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "linear"
+                    }}
+
+                    className="
+                        w-16
+                        h-16
+                        rounded-full
+                        border-[3px]
+                        border-emerald-500/20
+                        border-t-emerald-400
+                    "
+                />
+
+                <p
+                    className="
+                        text-gray-400
+                        text-lg
+                        tracking-wide
+                    "
+                >
+                    Loading algorithms...
+                </p>
+
             </div>
+
         );
     }
 
     return (
-        <section className='flex flex-col gap-8 px-4 md:px-8 py-6'>
-            <div className='flex flex-col gap-3 max-w-3xl'>
-                <motion.h1
-                    className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight"
-                    initial={{ opacity: 0.3, y: 40, filter: "blur(20px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    transition={{ duration: 0.6 }}
+
+        <section
+            className="
+                relative
+                flex
+                flex-col
+                gap-8
+                px-4
+                md:px-8
+                py-8
+                overflow-hidden
+            "
+        >
+
+            <div
+                className="
+                    absolute
+                    top-0
+                    left-0
+                    w-[500px]
+                    h-[500px]
+                    bg-emerald-500/10
+                    blur-[140px]
+                    rounded-full
+                    pointer-events-none
+                "
+            />
+
+            <div
+                className="
+                    absolute
+                    bottom-0
+                    right-0
+                    w-[400px]
+                    h-[400px]
+                    bg-cyan-500/10
+                    blur-[140px]
+                    rounded-full
+                    pointer-events-none
+                "
+            />
+
+            <div
+                className="
+                    relative
+                    flex
+                    flex-col
+                    gap-5
+                    max-w-4xl
+                "
+            >
+
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 30
+                    }}
+
+                    animate={{
+                        opacity: 1,
+                        y: 0
+                    }}
+
+                    transition={{
+                        duration: 0.6
+                    }}
+
+                    className="
+                        inline-flex
+                        items-center
+                        gap-2
+                        px-4
+                        py-2
+                        rounded-full
+                        bg-white/5
+                        border
+                        border-white/10
+                        backdrop-blur-xl
+                        w-fit
+                    "
                 >
-                    <span className='bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent'>
-                        SCiVLab
-                    </span>{" "}
-                    - Learn Algorithms Visually
+
+                    <Sparkles
+                        className="
+                            text-yellow-400
+                        "
+                        size={16}
+                    />
+
+                    <span
+                        className="
+                            text-sm
+                            text-gray-300
+                            tracking-wide
+                        "
+                    >
+                        Interactive Visual Learning Platform
+                    </span>
+
+                </motion.div>
+
+                <motion.h1
+                    className="
+                        text-5xl
+                        md:text-7xl
+                        font-black
+                        leading-[1.05]
+                        tracking-tight
+                    "
+
+                    initial={{
+                        opacity: 0,
+                        y: 40,
+                        filter: "blur(20px)"
+                    }}
+
+                    animate={{
+                        opacity: 1,
+                        y: 0,
+                        filter: "blur(0px)"
+                    }}
+
+                    transition={{
+                        duration: 0.7
+                    }}
+                >
+
+                    <span
+                        className="
+                            bg-gradient-to-r
+                            from-emerald-300
+                            via-cyan-300
+                            to-blue-500
+                            bg-clip-text
+                            text-transparent
+                        "
+                    >
+                        Learn Algorithms
+                    </span>
+
+                    <br />
+
+                    <span
+                        className="
+                            text-white
+                        "
+                    >
+                        The Visual Way
+                    </span>
+
                 </motion.h1>
 
                 <motion.p
-                    className="text-muted-foreground text-base md:text-lg"
-                    initial={{ opacity: 0, x: 60 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5 }}
+                    className="
+                        text-gray-400
+                        text-lg
+                        md:text-xl
+                        leading-relaxed
+                        max-w-3xl
+                    "
+
+                    initial={{
+                        opacity: 0,
+                        y: 20
+                    }}
+
+                    animate={{
+                        opacity: 1,
+                        y: 0
+                    }}
+
+                    transition={{
+                        duration: 0.6,
+                        delay: 0.15
+                    }}
                 >
-                    Explore, understand, and master{" "}
-                    <span className='text-emerald-400 font-semibold'>algorithms</span>{" "}
-                    with interactive explanations and visual execution.
+
+                    Explore beautifully animated
+                    algorithm visualizations,
+                    solve coding challenges,
+                    and track your mastery journey
+                    step by step.
+
                 </motion.p>
+
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 20
+                    }}
+
+                    animate={{
+                        opacity: 1,
+                        y: 0
+                    }}
+
+                    transition={{
+                        duration: 0.5,
+                        delay: 0.25
+                    }}
+
+                    className="
+                        flex
+                        flex-wrap
+                        gap-3
+                        mt-2
+                    "
+                >
+
+                    <div
+                        className="
+                            flex
+                            items-center
+                            gap-2
+                            px-4
+                            py-2
+                            rounded-2xl
+                            bg-emerald-500/10
+                            border
+                            border-emerald-400/20
+                            text-emerald-300
+                            text-sm
+                        "
+                    >
+
+                        <BrainCircuit size={16} />
+
+                        Visual Learning
+
+                    </div>
+
+                    <div
+                        className="
+                            flex
+                            items-center
+                            gap-2
+                            px-4
+                            py-2
+                            rounded-2xl
+                            bg-cyan-500/10
+                            border
+                            border-cyan-400/20
+                            text-cyan-300
+                            text-sm
+                        "
+                    >
+
+                        <Rocket size={16} />
+
+                        Interactive Coding
+
+                    </div>
+
+                    <div
+                        className="
+                            flex
+                            items-center
+                            gap-2
+                            px-4
+                            py-2
+                            rounded-2xl
+                            bg-yellow-500/10
+                            border
+                            border-yellow-400/20
+                            text-yellow-300
+                            text-sm
+                        "
+                    >
+
+                        <Flame size={16} />
+
+                        Smart Progression
+
+                    </div>
+
+                </motion.div>
+
             </div>
 
-            {/* Progress Stats Card */}
             <motion.div
-                className="bg-gradient-to-r from-emerald-900/20 to-blue-900/20 rounded-2xl p-6 border border-emerald-500/20"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                initial={{
+                    opacity: 0,
+                    y: 25
+                }}
+
+                animate={{
+                    opacity: 1,
+                    y: 0
+                }}
+
+                transition={{
+                    duration: 0.6,
+                    delay: 0.3
+                }}
+
+                className="
+                    relative
+                    overflow-hidden
+                    rounded-[2rem]
+                    border
+                    border-white/10
+                    bg-gradient-to-br
+                    from-white/[0.07]
+                    to-white/[0.02]
+                    backdrop-blur-2xl
+                    p-6
+                    shadow-[0_20px_80px_rgba(0,0,0,0.45)]
+                "
             >
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-emerald-500/20 rounded-full">
-                            <Trophy className="text-emerald-400" size={24} />
+
+                <div
+                    className="
+                        absolute
+                        top-0
+                        right-0
+                        w-40
+                        h-40
+                        bg-emerald-500/10
+                        blur-[80px]
+                        rounded-full
+                    "
+                />
+
+                <div
+                    className="
+                        flex
+                        flex-col
+                        lg:flex-row
+                        justify-between
+                        gap-6
+                    "
+                >
+
+                    <div
+                        className="
+                            flex
+                            items-start
+                            gap-4
+                        "
+                    >
+
+                        <div
+                            className="
+                                p-4
+                                rounded-2xl
+                                bg-gradient-to-br
+                                from-emerald-500
+                                to-cyan-500
+                                shadow-lg
+                            "
+                        >
+
+                            <Trophy
+                                className="
+                                    text-white
+                                "
+                                size={28}
+                            />
+
                         </div>
+
                         <div>
-                            <h3 className="text-white font-semibold text-lg">Your Learning Journey</h3>
-                            <p className="text-gray-400 text-sm">
+
+                            <h3
+                                className="
+                                    text-2xl
+                                    font-bold
+                                    text-white
+                                "
+                            >
+                                Your Journey
+                            </h3>
+
+                            <p
+                                className="
+                                    text-gray-400
+                                    mt-1
+                                    max-w-xl
+                                "
+                            >
+
                                 {completedCount === 0
-                                    ? "Start your first algorithm to begin the journey!"
+                                    ? "Start your first algorithm and unlock the journey."
                                     : completedCount === totalCount
-                                        ? "🎉 Amazing! You've mastered all algorithms!"
+                                        ? "You completed every algorithm. Incredible work."
                                         : nextToUnlock
-                                            ? `Keep going! Complete "${nextToUnlock.title}" to unlock the next algorithm`
-                                            : "Almost there!"}
+                                            ? `Complete "${nextToUnlock.title}" to unlock the next challenge.`
+                                            : "Keep progressing and sharpen your problem-solving skills."
+                                }
+
                             </p>
+
                         </div>
+
                     </div>
-                    <div className="text-right">
-                        <div className="text-2xl font-bold text-emerald-400">
+
+                    <div
+                        className="
+                            flex
+                            flex-col
+                            items-start
+                            lg:items-end
+                            justify-center
+                        "
+                    >
+
+                        <div
+                            className="
+                                text-5xl
+                                font-black
+                                bg-gradient-to-r
+                                from-emerald-300
+                                to-cyan-300
+                                bg-clip-text
+                                text-transparent
+                            "
+                        >
                             {completedCount}/{totalCount}
                         </div>
-                        <div className="text-xs text-gray-500">Algorithms Completed</div>
+
+                        <div
+                            className="
+                                text-sm
+                                text-gray-500
+                                mt-1
+                            "
+                        >
+                            Algorithms Mastered
+                        </div>
+
                     </div>
+
                 </div>
 
-                <div className="mt-4">
-                    <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                <div
+                    className="
+                        mt-6
+                    "
+                >
+
+                    <div
+                        className="
+                            w-full
+                            h-4
+                            rounded-full
+                            bg-black/30
+                            overflow-hidden
+                            border
+                            border-white/5
+                        "
+                    >
+
                         <motion.div
-                            className="bg-gradient-to-r from-emerald-500 to-green-500 h-3 rounded-full"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progressPercentage}%` }}
-                            transition={{ duration: 0.8, delay: 0.3 }}
+                            className="
+                                h-full
+                                rounded-full
+                                bg-gradient-to-r
+                                from-emerald-400
+                                via-green-400
+                                to-cyan-400
+                                shadow-[0_0_25px_rgba(16,185,129,0.6)]
+                            "
+
+                            initial={{
+                                width: 0
+                            }}
+
+                            animate={{
+                                width: `${progressPercentage}%`
+                            }}
+
+                            transition={{
+                                duration: 1
+                            }}
                         />
+
                     </div>
+
                 </div>
+
             </motion.div>
 
-            {/* search bar , filter*/}
-            <div className='flex flex-col md:flex-row gap-4 items-center justify-between bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-lg'>
-                <div className="relative w-full md:max-w-md">
-                    <Search className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
+            <motion.div
+                initial={{
+                    opacity: 0,
+                    y: 20
+                }}
+
+                animate={{
+                    opacity: 1,
+                    y: 0
+                }}
+
+                transition={{
+                    duration: 0.5,
+                    delay: 0.35
+                }}
+
+                className="
+                    flex
+                    flex-col
+                    lg:flex-row
+                    gap-4
+                    items-center
+                    justify-between
+                    rounded-[1.8rem]
+                    border
+                    border-white/10
+                    bg-white/[0.04]
+                    backdrop-blur-2xl
+                    p-5
+                    shadow-xl
+                "
+            >
+
+                <div
+                    className="
+                        relative
+                        w-full
+                        lg:max-w-lg
+                    "
+                >
+
+                    <Search
+                        className="
+                            absolute
+                            left-4
+                            top-1/2
+                            -translate-y-1/2
+                            text-gray-500
+                            w-5
+                            h-5
+                        "
+                    />
+
                     <Input
                         type="search"
+
                         placeholder="Search algorithms..."
+
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="pl-10 rounded-xl bg-black/30 border-white/10 focus:ring-2 focus:ring-emerald-500"
+
+                        onChange={(e) =>
+                            setSearch(
+                                e.target.value
+                            )
+                        }
+
+                        className="
+                            pl-12
+                            h-12
+                            rounded-2xl
+                            border-white/10
+                            bg-black/20
+                            text-white
+                            placeholder:text-gray-500
+                            focus:ring-2
+                            focus:ring-emerald-500
+                            focus:border-emerald-400
+                        "
                     />
+
                 </div>
 
                 <DropdownMenu>
+
                     <DropdownMenuTrigger asChild>
-                        <Button className="gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:opacity-90 transition shadow-md">
+
+                        <Button
+                            className="
+                                h-12
+                                px-5
+                                gap-2
+                                rounded-2xl
+                                bg-gradient-to-r
+                                from-emerald-500
+                                to-cyan-500
+                                hover:opacity-90
+                                text-white
+                                shadow-lg
+                            "
+                        >
+
                             <Filter size={16} />
+
                             {Category}
+
+                            <ChevronRight size={16} />
+
                         </Button>
+
                     </DropdownMenuTrigger>
 
-                    <DropdownMenuContent className="rounded-xl border border-white/10 bg-gray-900/95 backdrop-blur-lg text-white">
+                    <DropdownMenuContent
+                        className="
+                            rounded-2xl
+                            border
+                            border-white/10
+                            bg-zinc-950/95
+                            backdrop-blur-2xl
+                            text-white
+                            p-2
+                        "
+                    >
+
                         <DropdownMenuGroup>
+
                             <DropdownMenuRadioGroup
                                 value={Category}
-                                onValueChange={setCategory}
+                                onValueChange={
+                                    setCategory
+                                }
                             >
+
                                 {categories.map((cat) => (
+
                                     <DropdownMenuRadioItem
                                         key={cat}
+
                                         value={cat}
-                                        className="cursor-pointer hover:bg-emerald-500/20"
+
+                                        className="
+                                            cursor-pointer
+                                            rounded-xl
+                                            py-2
+                                            hover:bg-emerald-500/10
+                                            focus:bg-emerald-500/10
+                                        "
                                     >
                                         {cat}
                                     </DropdownMenuRadioItem>
+
                                 ))}
+
                             </DropdownMenuRadioGroup>
+
                         </DropdownMenuGroup>
+
                     </DropdownMenuContent>
+
                 </DropdownMenu>
+
+            </motion.div>
+
+            <div
+                className="
+                    flex
+                    items-center
+                    gap-3
+                    mt-2
+                "
+            >
+
+                <div
+                    className="
+                        p-2
+                        rounded-xl
+                        bg-emerald-500/10
+                        border
+                        border-emerald-400/20
+                    "
+                >
+
+                    <Star
+                        className="
+                            text-emerald-300
+                        "
+                        size={18}
+                    />
+
+                </div>
+
+                <div>
+
+                    <h2
+                        className="
+                            text-2xl
+                            font-bold
+                            text-white
+                        "
+                    >
+                        Browse Algorithms
+                    </h2>
+
+                    <p
+                        className="
+                            text-sm
+                            text-gray-500
+                        "
+                    >
+                        Interactive visual lessons sorted by progression
+                    </p>
+
+                </div>
+
             </div>
 
-            <div className='flex items-center gap-2 text-xl font-semibold'>
-                <Sparkles className="text-emerald-400" size={18} />
-                Browse Algorithms
-                <span className="text-sm text-gray-500 font-normal ml-2">
-                    (Sorted by difficulty)
-                </span>
-            </div>
+            <div
+                className="
+                    grid
+                    grid-cols-1
+                    sm:grid-cols-2
+                    xl:grid-cols-3
+                    gap-7
+                "
+            >
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
                 {filteredAlgos.length === 0 ? (
-                    <div className="col-span-full text-center text-gray-400 py-10">
+
+                    <div
+                        className="
+                            col-span-full
+                            text-center
+                            text-gray-400
+                            py-16
+                        "
+                    >
                         No algorithms found
                     </div>
+
                 ) : (
+
                     filteredAlgos
-                        .sort((a, b) => (a.order || 999) - (b.order || 999))
-                        .map((algo, index) => (
-                            <motion.div
-                                key={algo._id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.05 }}
-                                whileHover={{ scale: algo.unlocked ? 1.03 : 1 }}
-                            >
-                                <AlgoBox algo={algo} />
-                            </motion.div>
-                        ))
+                        .sort(
+                            (a, b) =>
+                                (a.order || 999) -
+                                (b.order || 999)
+                        )
+                        .map(
+                            (
+                                algo,
+                                index
+                            ) => (
+
+                                <motion.div
+                                    key={algo._id}
+
+                                    initial={{
+                                        opacity: 0,
+                                        y: 30
+                                    }}
+
+                                    animate={{
+                                        opacity: 1,
+                                        y: 0
+                                    }}
+
+                                    transition={{
+                                        duration: 0.35,
+                                        delay: index * 0.05
+                                    }}
+
+                                    whileHover={{
+                                        y: algo.unlocked
+                                            ? -8
+                                            : 0,
+                                        scale: algo.unlocked
+                                            ? 1.02
+                                            : 1
+                                    }}
+                                >
+
+                                    <AlgoBox
+                                        algo={algo}
+                                    />
+
+                                </motion.div>
+
+                            )
+                        )
+
                 )}
+
             </div>
 
-            {/* Completion Celebration Banner */}
-            {completedCount === totalCount && totalCount > 0 && (
-                <motion.div
-                    className="mt-4 p-6 bg-gradient-to-r from-emerald-500/20 to-yellow-500/20 rounded-2xl border border-emerald-500/30 text-center"
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <h3 className="text-2xl font-bold text-emerald-400 mb-2">🎉 Congratulations! 🎉</h3>
-                    <p className="text-gray-300">
-                        You've completed all algorithms! You're now a master of fundamental algorithms.
-                    </p>
-                </motion.div>
-            )}
+            {completedCount === totalCount &&
+                totalCount > 0 && (
+
+                    <motion.div
+                        initial={{
+                            opacity: 0,
+                            scale: 0.95
+                        }}
+
+                        animate={{
+                            opacity: 1,
+                            scale: 1
+                        }}
+
+                        transition={{
+                            duration: 0.5
+                        }}
+
+                        className="
+                            relative
+                            overflow-hidden
+                            rounded-[2rem]
+                            border
+                            border-yellow-400/20
+                            bg-gradient-to-r
+                            from-yellow-500/10
+                            via-emerald-500/10
+                            to-cyan-500/10
+                            p-8
+                            text-center
+                            shadow-[0_20px_80px_rgba(0,0,0,0.4)]
+                        "
+                    >
+
+                        <div
+                            className="
+                                absolute
+                                inset-0
+                                bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_60%)]
+                            "
+                        />
+
+                        <h3
+                            className="
+                                relative
+                                text-4xl
+                                font-black
+                                text-white
+                                mb-3
+                            "
+                        >
+                            🎉 Mastered All Algorithms
+                        </h3>
+
+                        <p
+                            className="
+                                relative
+                                text-gray-300
+                                max-w-2xl
+                                mx-auto
+                            "
+                        >
+
+                            You completed every algorithm
+                            in the learning path.
+                            Your consistency and dedication
+                            turned you into an algorithm wizard.
+
+                        </p>
+
+                    </motion.div>
+
+                )}
 
         </section>
+
     );
 }
 

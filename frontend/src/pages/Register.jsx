@@ -12,7 +12,9 @@ import {
   Eye,
   EyeOff,
   Sparkles,
-  Hash
+  Hash,
+  GraduationCap,
+  Shield
 } from "lucide-react";
 
 export default function Register() {
@@ -31,7 +33,7 @@ export default function Register() {
     setConfirmPassword
   ] = useState("");
 
-  const [role] =
+  const [role, setRole] =
     useState("student");
 
   const [loading, setLoading] =
@@ -46,7 +48,7 @@ export default function Register() {
     async () => {
 
       if (
-        !fullName ||
+        !fullName.trim() ||
         !password
       ) {
 
@@ -57,7 +59,7 @@ export default function Register() {
 
       if (
         role === "student" &&
-        !rollNumber
+        !rollNumber.trim()
       ) {
 
         return toast.error(
@@ -100,12 +102,12 @@ export default function Register() {
               },
 
               body: JSON.stringify({
-                fullName,
+                fullName:
+                  fullName.trim(),
 
                 rollNumber:
-                  role ===
-                  "student"
-                    ? rollNumber
+                  role === "student"
+                    ? rollNumber.trim().toUpperCase()
                     : "",
 
                 role,
@@ -289,6 +291,88 @@ export default function Register() {
                   focus:ring-emerald-500
                 "
               />
+
+            </div>
+
+            <div className="flex gap-3 mt-2">
+
+              <button
+                type="button"
+                onClick={() =>
+                  setRole("student")
+                }
+                className={`
+                  flex-1
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                  py-2
+                  rounded-xl
+                  border
+                  transition
+
+                  ${role === "student"
+                    ? `
+                      bg-emerald-500/20
+                      border-emerald-400
+                      text-emerald-300
+                    `
+                    : `
+                      border-white/10
+                      text-gray-400
+                      hover:bg-white/10
+                    `
+                  }
+                `}
+              >
+
+                <GraduationCap
+                  size={16}
+                />
+
+                Student
+
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setRole("admin")
+                }
+                className={`
+                  flex-1
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                  py-2
+                  rounded-xl
+                  border
+                  transition
+
+                  ${role === "admin"
+                    ? `
+                      bg-purple-500/20
+                      border-purple-400
+                      text-purple-300
+                    `
+                    : `
+                      border-white/10
+                      text-gray-400
+                      hover:bg-white/10
+                    `
+                  }
+                `}
+              >
+
+                <Shield
+                  size={16}
+                />
+
+                Teacher
+
+              </button>
 
             </div>
 

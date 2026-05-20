@@ -9,15 +9,22 @@ import {
   Search,
   User,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Sparkles,
+  GraduationCap,
+  Activity
 } from "lucide-react";
 
 import { Button } from "../ui/button";
+
 import { useNavigate } from "react-router-dom";
+
+import { motion } from "motion/react";
 
 function AdminStudents() {
 
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   const [students, setStudents] =
     useState([]);
@@ -79,294 +86,460 @@ function AdminStudents() {
     );
 
   if (loading) {
+
     return (
-      <div className="
-        text-center
-        py-20
-        text-gray-400
-      ">
+
+      <div
+        className="
+          flex flex-col items-center justify-center
+          py-24 text-gray-400
+        "
+      >
+
+        <div
+          className="
+            w-10 h-10
+            border-2 border-emerald-400/30
+            border-t-emerald-400
+            rounded-full
+            animate-spin
+            mb-4
+          "
+        />
+
         Loading students...
+
       </div>
     );
   }
 
   return (
-    <div className="
-      p-6
-      flex
-      flex-col
-      gap-6
-    ">
 
-      <Button
-        onClick={() => navigate("/admin")}
+    <div className="p-4 md:p-6 flex flex-col gap-6">
+
+      {/* TOP BAR */}
+
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+
+        <Button
+          onClick={() =>
+            navigate("/admin")
+          }
+
+          className="
+            px-4 py-2
+            rounded-xl
+            bg-white/[0.05]
+            border border-white/10
+            hover:bg-white/[0.08]
+            text-white
+          "
+        >
+
+          <ChevronLeft size={16} />
+          Back
+
+        </Button>
+
+        <div
+          className="
+            flex items-center gap-2
+            px-3 py-2
+            rounded-xl
+            border border-emerald-400/20
+            bg-emerald-500/10
+            text-emerald-300
+            text-sm
+          "
+        >
+
+          <Activity size={16} />
+
+          {filteredStudents.length} Students
+
+        </div>
+
+      </div>
+
+      {/* HEADER */}
+
+      <div
         className="
-          max-w-fit
-          px-4
-          py-2
-          rounded-xl
-          bg-white/10
-          hover:bg-white/20
+          relative overflow-hidden
+          rounded-3xl
+          border border-white/10
+          bg-gradient-to-br
+          from-cyan-500/10
+          via-emerald-500/5
+          to-purple-500/10
+          backdrop-blur-2xl
+          px-6 py-7
         "
       >
-        <ChevronLeft size={16} />
-        Back
-      </Button>
 
-      <div>
+        <div
+          className="
+            absolute -top-10 -right-10
+            w-52 h-52
+            bg-cyan-500/10
+            blur-3xl rounded-full
+          "
+        />
 
-        <h1 className="
-          text-3xl
-          font-bold
-        ">
-          Student Monitor
-        </h1>
+        <div className="relative flex items-start justify-between gap-4">
 
-        <p className="
-          text-gray-400
-          mt-1
-        ">
-          Track student progress
-          and completion
-        </p>
+          <div>
+
+            <div className="flex items-center gap-2 mb-2">
+
+              
+
+              <span className="text-sm text-cyan-300">
+                Student Analytics
+              </span>
+
+            </div>
+
+            <h1
+              className="
+                text-2xl md:text-3xl
+                font-bold tracking-tight
+                text-white
+              "
+            >
+              Student Monitor
+            </h1>
+
+            <p className="text-sm text-gray-400 mt-2 max-w-2xl">
+              Track student activity, monitor algorithm completion
+              progress and view learning performance.
+            </p>
+
+          </div>
+
+          <div
+            className="
+              hidden md:flex
+              items-center justify-center
+              w-16 h-16
+              rounded-2xl
+              bg-white/[0.04]
+              border border-white/10
+            "
+          >
+
+            <GraduationCap
+              size={28}
+              className="text-cyan-400"
+            />
+
+          </div>
+
+        </div>
 
       </div>
 
       {/* SEARCH */}
 
-      <div className="
-        relative
-        max-w-md
-      ">
+      <div className="relative max-w-md">
 
         <Search
           size={18}
           className="
             absolute
-            left-3
-            top-3
+            left-3 top-3.5
             text-gray-500
           "
         />
 
         <input
           type="text"
+
           placeholder="Search by name or roll number..."
+
           value={search}
+
           onChange={(e) =>
             setSearch(e.target.value)
           }
+
           className="
             w-full
-            pl-10
-            pr-4
-            py-3
-            rounded-xl
-            bg-white/5
+            pl-10 pr-4 py-3
+            rounded-2xl
+            bg-white/[0.04]
             border border-white/10
+            backdrop-blur-xl
+            text-white
+            placeholder:text-gray-500
             outline-none
+            transition-all
+            focus:border-emerald-400/30
+            focus:bg-white/[0.06]
           "
         />
 
       </div>
 
-      {/* TABLE */}
+      {/* STUDENTS */}
 
-      <div className="
-        rounded-2xl
-        border border-white/10
-        bg-white/5
-        backdrop-blur-xl
-        overflow-hidden
-      ">
+      <div className="flex flex-col gap-4">
 
-        {/* HEADER */}
+        {filteredStudents.length === 0 ? (
 
-        <div className="
-          grid
-          grid-cols-5
-          gap-4
-          px-6
-          py-4
-          border-b
-          border-white/10
-          text-gray-400
-          text-sm
-          font-medium
-        ">
+          <div
+            className="
+              text-center
+              py-16
+              rounded-3xl
+              border border-dashed border-white/10
+              text-gray-500
+            "
+          >
+            No students found
+          </div>
 
-          <div>Student</div>
-          <div>Roll No.</div>
-          <div>Progress</div>
-          <div>Completed</div>
-          <div>Latest</div>
+        ) : (
 
-        </div>
-
-        {/* BODY */}
-
-        <div className="
-          flex
-          flex-col
-        ">
-
-          {filteredStudents.map(
+          filteredStudents.map(
             (student, i) => (
 
-              <div
+              <motion.div
                 key={i}
-                className="
-                  grid
-                  grid-cols-5
-                  gap-4
-                  px-6
-                  py-5
-                  border-b
-                  border-white/5
-                  hover:bg-white/5
-                  cursor-pointer
-                  hover:scale-[1.01]
-                  transition
-                "
+
+                initial={{
+                  opacity: 0,
+                  y: 10
+                }}
+
+                animate={{
+                  opacity: 1,
+                  y: 0
+                }}
+
+                transition={{
+                  delay: i * 0.03
+                }}
+
+                whileHover={{
+                  y: -2
+                }}
+
                 onClick={() =>
                   navigate(
                     `/admin/students/${student.id}`
                   )
                 }
+
+                className="
+                  group
+                  relative overflow-hidden
+                  rounded-3xl
+                  border border-white/10
+                  bg-white/[0.04]
+                  backdrop-blur-2xl
+                  p-5
+                  cursor-pointer
+                  transition-all duration-300
+                  hover:border-emerald-400/20
+                  hover:bg-white/[0.05]
+                "
               >
 
-                {/* STUDENT */}
+                <div
+                  className="
+                    absolute inset-0
+                    opacity-0 group-hover:opacity-100
+                    transition duration-500
+                    bg-gradient-to-r
+                    from-emerald-500/[0.03]
+                    to-cyan-500/[0.03]
+                  "
+                />
 
-                <div className="
-                  flex
-                  items-center
-                  gap-3
-                ">
+                <div
+                  className="
+                    relative
+                    flex flex-col xl:flex-row
+                    xl:items-center
+                    justify-between
+                    gap-5
+                  "
+                >
 
-                  <div className="
-                    w-10
-                    h-10
-                    rounded-full
-                    bg-emerald-500/10
-                    flex
-                    items-center
-                    justify-center
-                    text-emerald-400
-                  ">
-                    <User size={18} />
-                  </div>
+                  {/* LEFT */}
 
-                  <div>
-
-                    <p className="
-                      font-medium
-                    ">
-                      {student.fullName}
-                    </p>
-
-                    <p className="
-                      text-xs
-                      text-gray-500
-                    ">
-                      Student
-                    </p>
-
-                  </div>
-
-                </div>
-
-                {/* ROLL NUMBER */}
-
-                <div className="
-                  flex
-                  items-center
-                  text-sm
-                  text-gray-300
-                ">
-                  {student.rollNumber}
-                </div>
-
-                {/* PROGRESS */}
-
-                <div className="
-                  flex
-                  flex-col
-                  justify-center
-                  gap-2
-                ">
-
-                  <div className="
-                    w-full
-                    h-2
-                    rounded-full
-                    bg-black/30
-                    overflow-hidden
-                  ">
+                  <div className="flex items-center gap-4 min-w-0">
 
                     <div
-                      style={{
-                        width:
-                          `${student.percentage}%`
-                      }}
                       className="
-                        h-full
-                        bg-gradient-to-r
-                        from-emerald-500
-                        to-green-400
+                        w-14 h-14
+                        rounded-2xl
+                        bg-emerald-500/10
+                        border border-emerald-400/10
+                        flex items-center justify-center
+                        text-emerald-400
+                        shrink-0
                       "
-                    />
+                    >
+
+                      <User size={22} />
+
+                    </div>
+
+                    <div className="min-w-0">
+
+                      <h2
+                        className="
+                          text-white font-semibold
+                          truncate
+                        "
+                      >
+                        {student.fullName}
+                      </h2>
+
+                      <div className="flex items-center gap-2 mt-1">
+
+                        <span
+                          className="
+                            text-xs
+                            px-2 py-1
+                            rounded-full
+                            bg-white/[0.05]
+                            border border-white/10
+                            text-gray-400
+                          "
+                        >
+                          {student.rollNumber}
+                        </span>
+
+                        <span className="text-xs text-gray-500">
+                          Student
+                        </span>
+
+                      </div>
+
+                    </div>
 
                   </div>
 
-                  <p className="
-                    text-xs
-                    text-gray-400
-                  ">
-                    {student.percentage}%
-                  </p>
+                  {/* CENTER */}
 
-                </div>
+                  <div className="flex-1 max-w-md">
 
-                {/* COMPLETED */}
+                    <div className="flex items-center justify-between mb-2">
 
-                <div className="
-                  flex
-                  items-center
-                  text-sm
-                ">
+                      <span className="text-xs text-gray-500">
+                        Progress
+                      </span>
 
-                  {student.completedCount}
-                  {" "}
-                  algorithms
+                      <span className="text-sm text-emerald-400 font-medium">
+                        {student.percentage}%
+                      </span>
 
-                </div>
+                    </div>
 
-                {/* LATEST */}
+                    <div
+                      className="
+                        w-full h-2.5
+                        rounded-full
+                        bg-black/30
+                        overflow-hidden
+                      "
+                    >
 
-                <div className="
-                  flex
-                  items-center
-                  justify-between
-                  text-sm
-                ">
+                      <motion.div
+                        initial={{
+                          width: 0
+                        }}
 
-                  <span>
-                    {student.latestAlgorithm}
-                  </span>
+                        animate={{
+                          width:
+                            `${student.percentage}%`
+                        }}
 
-                  <ChevronRight
-                    size={16}
+                        transition={{
+                          duration: 0.8
+                        }}
+
+                        className="
+                          h-full rounded-full
+                          bg-gradient-to-r
+                          from-emerald-500
+                          via-green-400
+                          to-cyan-400
+                        "
+                      />
+
+                    </div>
+
+                  </div>
+
+                  {/* RIGHT */}
+
+                  <div
                     className="
-                      text-gray-500
+                      flex items-center
+                      justify-between xl:justify-end
+                      gap-6
                     "
-                  />
+                  >
+
+                    <div className="text-right">
+
+                      <p className="text-lg font-bold text-white">
+                        {student.completedCount}
+                      </p>
+
+                      <p className="text-xs text-gray-500">
+                        Completed
+                      </p>
+
+                    </div>
+
+                    <div className="hidden md:block">
+
+                      <p
+                        className="
+                          text-sm text-gray-300
+                          max-w-[180px]
+                          truncate
+                        "
+                      >
+                        {student.latestAlgorithm}
+                      </p>
+
+                      <p className="text-xs text-gray-500 mt-1">
+                        Latest Algorithm
+                      </p>
+
+                    </div>
+
+                    <div
+                      className="
+                        w-10 h-10
+                        rounded-xl
+                        border border-white/10
+                        bg-black/20
+                        flex items-center justify-center
+                        text-gray-500
+                        group-hover:text-white
+                        group-hover:border-emerald-400/20
+                        transition-all
+                      "
+                    >
+
+                      <ChevronRight size={18} />
+
+                    </div>
+
+                  </div>
 
                 </div>
 
-              </div>
-            ))}
-
-        </div>
+              </motion.div>
+            ))
+        )}
 
       </div>
 

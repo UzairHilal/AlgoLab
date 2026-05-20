@@ -1,173 +1,412 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui/button";
-import { ChevronLeft, ArrowRight, Sparkles } from "lucide-react";
+import { ChevronLeft, ArrowRight } from "lucide-react";
 import InfoTab from "./TabsLayout/InfoTab";
 import VisualTab from "./TabsLayout/VisualTab";
 import VisualiztionTab from "./TabsLayout/VisualizationTab";
 import CodeTab from "./TabsLayout/CodeTab";
 import Tabs from "./TabsLayout/Tabs";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { apiFetch } from "@/utils/api";
 
 function AlgoWorkspace() {
+
   const { id } = useParams();
+
   const navigate = useNavigate();
 
   const [algo, setAlgo] = useState(null);
-  const [activeTab, setActiveTab] = useState("info");
 
-  const tabOrder = ["info", "flow", "visual", "code"];
-  const index = tabOrder.indexOf(activeTab);
-  const isLastTab = index === tabOrder.length - 1;
+  const [activeTab, setActiveTab] =
+    useState("info");
+
+  const tabOrder = [
+    "info",
+    "flow",
+    "visual",
+    "code"
+  ];
+
+  const index =
+    tabOrder.indexOf(activeTab);
+
+  const isLastTab =
+    index === tabOrder.length - 1;
 
   const handleBack = () => {
+
     if (index > 0) {
-      setActiveTab(tabOrder[index - 1]);
+
+      setActiveTab(
+        tabOrder[index - 1]
+      );
+
     } else {
+
       navigate("/");
     }
   };
 
   const handleNext = () => {
+
     if (index < tabOrder.length - 1) {
-      setActiveTab(tabOrder[index + 1]);
+
+      setActiveTab(
+        tabOrder[index + 1]
+      );
     }
   };
 
   useEffect(() => {
+
     const fetchAlgo = async () => {
+
       try {
-        const res = await apiFetch(`algorithms/${id}`);
-        const data = await res.json();
+
+        const res =
+          await apiFetch(
+            `algorithms/${id}`
+          );
+
+        const data =
+          await res.json();
+
         setAlgo(data);
+
       } catch (err) {
+
         console.error(err);
       }
     };
 
     fetchAlgo();
+
   }, [id]);
 
   if (!algo) {
+
     return (
-      <div className="min-h-[60vh] flex items-center justify-center text-gray-400 animate-pulse">
-        Loading workspace...
+
+      <div className="min-h-[60vh] flex items-center justify-center">
+
+        <div className="flex flex-col items-center gap-3">
+
+          <div className="w-10 h-10 rounded-full border-2 border-emerald-500/20 border-t-emerald-400 animate-spin" />
+
+          <p className="text-sm text-gray-400 animate-pulse">
+            Loading workspace...
+          </p>
+
+        </div>
+
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 sm:px-4 md:px-8 py-6">
 
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-5 px-3 sm:px-4 md:px-6 py-5">
 
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={handleBack}
-            className="rounded-xl bg-white/10 hover:bg-white/20 transition"
-          >
-            <ChevronLeft />
-          </Button>
+      {/* HEADER */}
 
-          <div className="flex flex-col">
-            <h1 className="text-xl md:text-2xl font-bold">
-              {algo.title}
-            </h1>
-            <p className="text-sm text-gray-400">
-              Learn step by step
-            </p>
+      <motion.div
+        initial={{
+          opacity: 0,
+          y: 14
+        }}
+
+        animate={{
+          opacity: 1,
+          y: 0
+        }}
+
+        transition={{
+          duration: 0.35
+        }}
+
+        className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-xl shadow-xl"
+      >
+
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.12),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.10),transparent_30%)]" />
+
+        <div className="relative flex flex-col gap-5 p-4 md:p-5">
+
+          <div className="flex items-center justify-between gap-4">
+
+            <div className="flex items-center gap-3">
+
+              <Button
+                onClick={handleBack}
+                className="h-10 w-10 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all"
+              >
+                <ChevronLeft size={18} />
+              </Button>
+
+              <div>
+
+                <span className="text-[11px] uppercase tracking-[0.22em] text-emerald-400 font-semibold">
+                  Algorithm Workspace
+                </span>
+
+                <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white">
+                  {algo.title}
+                </h1>
+
+              </div>
+
+            </div>
+
+            <div className="hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-gray-400">
+
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+
+              Step {index + 1} / {tabOrder.length}
+
+            </div>
+
           </div>
-        </div>
 
-        {/* <Sparkles className="text-emerald-400 hidden md:block" /> */}
+          {/* PROGRESS */}
 
-      </div>
+          <div className="flex flex-col gap-2">
 
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 shadow-xl overflow-hidden">
+            <div className="flex items-center justify-between text-xs text-gray-400">
 
-        <div className="mb-4 border-b border-white/10 pb-2">
-          <Tabs
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
-        </div>
+              <span>
+                Learning Progress
+              </span>
 
-        <div className="min-h-100">
+              <span className="text-emerald-400 font-medium">
+                {Math.round(((index + 1) / tabOrder.length) * 100)}%
+              </span>
 
-          {activeTab === "info" && (
-            <motion.div
-              key="info"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <InfoTab algo={algo} />
-            </motion.div>
-          )}
+            </div>
 
-          {activeTab === "flow" && (
-            <motion.div
-              key="flow"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <VisualTab algo={algo} />
-            </motion.div>
-          )}
+            <div className="h-2 overflow-hidden rounded-full bg-white/5 border border-white/10">
 
-          {activeTab === "visual" && (
-            <motion.div
-              key="visual"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <VisualiztionTab algo={algo} />
-            </motion.div>
-          )}
+              <motion.div
+                initial={{ width: 0 }}
 
-          {activeTab === "code" && (
-            <motion.div
-              key="code"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <CodeTab algo={algo} />
-            </motion.div>
-          )}
+                animate={{
+                  width: `${((index + 1) / tabOrder.length) * 100}%`
+                }}
+
+                transition={{
+                  duration: 0.45
+                }}
+
+                className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400"
+              />
+
+            </div>
+
+          </div>
 
         </div>
 
-      </div>
+      </motion.div>
 
-      <div className="flex justify-between items-center">
+      {/* CONTENT */}
+
+      <motion.div
+        initial={{
+          opacity: 0,
+          y: 14
+        }}
+
+        animate={{
+          opacity: 1,
+          y: 0
+        }}
+
+        transition={{
+          duration: 0.4,
+          delay: 0.05
+        }}
+
+        className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-xl"
+      >
+
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.05),transparent_35%)]" />
+
+        <div className="relative p-4 md:p-5">
+
+          <div className="mb-5 border-b border-white/10 pb-3">
+            <Tabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+          </div>
+
+          <div className="min-h-[560px]">
+
+            <AnimatePresence mode="wait">
+
+              {activeTab === "info" && (
+                <motion.div
+                  key="info"
+
+                  initial={{
+                    opacity: 0,
+                    y: 12
+                  }}
+
+                  animate={{
+                    opacity: 1,
+                    y: 0
+                  }}
+
+                  exit={{
+                    opacity: 0,
+                    y: -8
+                  }}
+
+                  transition={{
+                    duration: 0.25
+                  }}
+                >
+                  <InfoTab algo={algo} />
+                </motion.div>
+              )}
+
+              {activeTab === "flow" && (
+                <motion.div
+                  key="flow"
+
+                  initial={{
+                    opacity: 0,
+                    y: 12
+                  }}
+
+                  animate={{
+                    opacity: 1,
+                    y: 0
+                  }}
+
+                  exit={{
+                    opacity: 0,
+                    y: -8
+                  }}
+
+                  transition={{
+                    duration: 0.25
+                  }}
+                >
+                  <VisualTab algo={algo} />
+                </motion.div>
+              )}
+
+              {activeTab === "visual" && (
+                <motion.div
+                  key="visual"
+
+                  initial={{
+                    opacity: 0,
+                    y: 12
+                  }}
+
+                  animate={{
+                    opacity: 1,
+                    y: 0
+                  }}
+
+                  exit={{
+                    opacity: 0,
+                    y: -8
+                  }}
+
+                  transition={{
+                    duration: 0.25
+                  }}
+                >
+                  <VisualiztionTab algo={algo} />
+                </motion.div>
+              )}
+
+              {activeTab === "code" && (
+                <motion.div
+                  key="code"
+
+                  initial={{
+                    opacity: 0,
+                    y: 12
+                  }}
+
+                  animate={{
+                    opacity: 1,
+                    y: 0
+                  }}
+
+                  exit={{
+                    opacity: 0,
+                    y: -8
+                  }}
+
+                  transition={{
+                    duration: 0.25
+                  }}
+                >
+                  <CodeTab algo={algo} />
+                </motion.div>
+              )}
+
+            </AnimatePresence>
+
+          </div>
+
+        </div>
+
+      </motion.div>
+
+      {/* FOOTER */}
+
+      <motion.div
+        initial={{
+          opacity: 0,
+          y: 10
+        }}
+
+        animate={{
+          opacity: 1,
+          y: 0
+        }}
+
+        transition={{
+          duration: 0.35,
+          delay: 0.1
+        }}
+
+        className="flex items-center justify-between"
+      >
 
         <Button
           onClick={handleBack}
-          className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20"
+          className="h-11 rounded-xl border border-white/10 bg-white/5 px-4 hover:bg-white/10 transition-all"
         >
+
           <ChevronLeft size={16} />
+
           Back
+
         </Button>
 
-        <div className="text-sm text-gray-400">
-          Step {index + 1} of {tabOrder.length}
-        </div>
+        {!isLastTab && (
 
-        <Button
-          onClick={handleNext}
-          className={`
-            flex items-center gap-2 px-4 py-2 rounded-xl font-medium
-            ${isLastTab
-              ? "bg-green-500/20 text-green-300 border border-green-400/30"
-              : "bg-gradient-to-r from-emerald-500 to-green-600 hover:opacity-90"}
-          `}
-        >
-          {isLastTab ? "Finish" : "Next"}
-          {!isLastTab && <ArrowRight size={16} />}
-        </Button>
+          <Button
+            onClick={handleNext}
+            className="h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 px-5 text-white shadow-lg shadow-emerald-500/20 hover:opacity-95 transition-all"
+          >
 
-      </div>
+            Next
+
+            <ArrowRight size={16} />
+
+          </Button>
+
+        )}
+
+      </motion.div>
 
     </div>
   );

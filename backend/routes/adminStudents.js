@@ -3,7 +3,7 @@ import express from "express";
 import User from "../models/User.js";
 import Algorithm from "../models/Algorithm.js";
 import UserProgress from "../models/UserProgress.js";
-
+import Submission from "../models/Submission.js";
 import {
   authMiddleware,
   adminOnly
@@ -153,5 +153,43 @@ router.get(
     }
   }
 );
+router.get(
+  "/:studentId/submission/:algorithmSlug",
+  authMiddleware,
+  adminOnly,
+  async (req, res) => {
 
+    try {
+
+      const { studentId, algorithmSlug } = req.params;
+      const submission = await Submission.findOne({
+        studentId: studentId,
+        algorithmSlug,
+        passed: true
+      }).sort({ updatedAt: -1 });
+      if (!submission) {
+
+        return res.status(404).json({
+          error: "Submission not found"
+        });
+
+      }
+
+      res.json({
+        algorithm: algorithmSlug,
+        code: submission.code,
+        language: submission.language
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      res.status(500).json({
+        error: err.message
+      });
+
+    }
+  }
+);
 export default router;

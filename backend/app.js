@@ -43,6 +43,9 @@ app.use("/api/progress", progressRoute)
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/students", adminStudentsRoutes);
 
+app.get("/health", (req, res) => {
+  return res.status(200).send("ok")
+})
 app.use((req, res) => {
   res.sendFile(
     path.join(__dirname, "../frontend/dist/index.html")

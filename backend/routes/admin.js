@@ -7,7 +7,7 @@ import { authMiddleware, adminOnly } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/stats",authMiddleware,adminOnly,
+router.get("/stats", authMiddleware, adminOnly,
   async (req, res) => {
     try {
 
@@ -46,8 +46,5 @@ router.get("/stats",authMiddleware,adminOnly,
     }
   }
 );
-
-
-
 
 export default router;

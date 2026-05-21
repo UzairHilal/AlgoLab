@@ -40,7 +40,7 @@ export default function App() {
   const getNavbar = () => {
     if (isAuthPage || isLanding) return null;
     if (isTeacherRoute) return <TeacherNavbar />;
-    if (isStudentRoute) return null; // Sidebar handles navigation
+    if (isStudentRoute) return null; 
     return <Navbar />;
   };
 
@@ -69,7 +69,7 @@ export default function App() {
                 <Route path="/teacher/lab/:labId" element={<TeacherLabDetail />} />
               </Route>
 
-              {/* STUDENT - UNIFIED PORTAL WITH SIDEBAR */}
+              {/* STUDENT - */}
               <Route element={<ProtectedRoute allowedRoles={["student"]} withLayout={true} />}>
                 <Route path="/student/dashboard" element={<StudentDashboard />} />
                 <Route path="/student/lab/:labId" element={<StudentLabDetail />} />

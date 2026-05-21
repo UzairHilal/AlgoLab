@@ -9,6 +9,18 @@ import adminRoutes from "./routes/admin.js"
 import adminStudentsRoutes
   from "./routes/adminStudents.js";
 
+import teacherAuthRoutes from "./routes/teacherAuth.js";
+import labRoutes from "./routes/lab.js";
+import studentRoutes from "./routes/students.js";
+import practicalRoutes from "./routes/practical.js";
+// import submissionRoutes from "./routes/submission.js";
+import evaluationRoutes from "./routes/evaluation.js";
+import marksRoutes from "./routes/marks.js";
+import attendanceRoutes from "./routes/attendance.js";
+import reportRoutes from "./routes/reports.js";
+import studentLabRoutes from "./routes/studentLab.js";
+
+
 import connectDB from "./config/db.js";
 import progressRoute from "./routes/progress.js"
 import path from "path";
@@ -42,6 +54,17 @@ app.use("/api/assignments", assignmentRoutes);
 app.use("/api/progress", progressRoute)
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/students", adminStudentsRoutes);
+
+app.use("/api/teacher", teacherAuthRoutes);
+app.use("/api/labs", labRoutes);
+app.use("/api/lab-students", studentRoutes);
+app.use("/api/practicals", practicalRoutes);
+app.use("/api/submissions", submissionRoutes);
+app.use("/api/evaluations", evaluationRoutes);
+app.use("/api/marks", marksRoutes);
+app.use("/api/attendance", attendanceRoutes);
+app.use("/api/reports", reportRoutes);
+app.use("/api/student", studentLabRoutes);
 
 app.get("/health", (req, res) => {
   return res.status(200).send("ok")

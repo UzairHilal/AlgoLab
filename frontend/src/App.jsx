@@ -1,226 +1,85 @@
-import {
-  useLocation,
-  useNavigate,
-  Route,
-  Routes
-} from "react-router-dom";
-
+import { useLocation, useNavigate, Route, Routes } from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
-
+import TeacherNavbar from "./components/layout/TeacherNavbar";
 import { Toaster } from "react-hot-toast";
-
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import LandingPage from "./pages/LandingPage";
-
+import TeacherLogin from "./pages/TeacherLogin";
+import TeacherRegister from "./pages/TeacherRegister";
+import TeacherDashboard from "./pages/TeacherDashboard";
+import TeacherLabDetail from "./pages/TeacherLabDetail";
+import StudentDashboard from "./pages/StudentDashboard";
+import StudentLabDetail from "./pages/StudentLabDetail";
 import AlgoDashboard from "./components/layout/AlgoDashboard";
 import AlgoWorkspace from "./components/layout/AlgoWorkspace";
-
 import ProtectedRoute from "./utils/ProtectedRoute";
-
-import {
-  useEffect,
-  useState
-} from "react";
-
-import AdminDashboard from "./components/admin/AdminDashboard";
-import AdminRoute from "./components/auth/AdminRoute";
-import AdminStudents from "./components/admin/AdminStudents";
-import StudentDetails from "./components/admin/StudentDetails";
+import TeacherRoute from "./utils/TeacherRoute";
+import { useEffect, useState } from "react";
 
 export default function App() {
-
   const location = useLocation();
-
   const navigate = useNavigate();
-
-  const [role, setRole] =
-    useState(null);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
-
-    setRole(
-      localStorage.getItem("role")
-    );
-
+    setRole(localStorage.getItem("role"));
   }, []);
 
   useEffect(() => {
-
     if (!role) return;
+    if (role === "teacher" && location.pathname === "/") navigate("/teacher/dashboard");
+    if (role === "student" && location.pathname === "/") navigate("/student/dashboard");
+  }, [role, location.pathname]);
 
-    if (
-      role === "admin" &&
-      location.pathname === "/"
-    ) {
+  const isLanding = location.pathname === "/";
+  const isTeacherRoute = location.pathname.startsWith("/teacher");
+  const isStudentRoute = location.pathname.startsWith("/student") || location.pathname.startsWith("/algo");
+  const isAuthPage = ["/login", "/register", "/teacher/login", "/teacher/register"].includes(location.pathname);
 
-      navigate("/admin");
-
-    }
-
-    if (
-      role === "student" &&
-      location.pathname === "/"
-    ) {
-
-      navigate("/dashboard");
-
-    }
-
-  }, [
-    role,
-    location.pathname
-  ]);
-
-  const isLanding =
-    location.pathname === "/";
+  const getNavbar = () => {
+    if (isAuthPage || isLanding) return null;
+    if (isTeacherRoute) return <TeacherNavbar />;
+    if (isStudentRoute) return null; // Sidebar handles navigation
+    return <Navbar />;
+  };
 
   return (
     <>
-
       <Toaster position="top-center" />
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-zinc-900 to-zinc-950 text-white">
+        {getNavbar()}
+        {!isStudentRoute && <div className="sticky top-0 z-40 backdrop-blur-md bg-white/5 border-b border-white/10" />}
 
-      <div
-        className="
-          min-h-screen
-          flex
-          flex-col
-          bg-gradient-to-br
-          from-black
-          via-zinc-900
-          to-zinc-950
-          text-white
-        "
-      >
-
-        <Navbar />
-
-        <div
-          className="
-            sticky
-            top-0
-            z-40
-            backdrop-blur-md
-            bg-white/5
-            border-b
-            border-white/10
-          "
-        >
-        </div>
-
-        <div
-          className={`
-            flex-1
-            ${isLanding
-              ? ""
-              : "px-4 md:px-8 py-6"
-            }
-          `}
-        >
-
-          <div
-            className={
-              isLanding
-                ? ""
-                : `
-                  max-w-full
-                  mx-auto
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-2xl
-                  p-4
-                  md:p-6
-                  shadow-xl
-                  backdrop-blur-md
-                `
-            }
-          >
-
+        <div className={`flex-1 ${isLanding ? "" : !isStudentRoute ? "px-4 md:px-8 py-6" : ""}`}>
+          <div className={isLanding || isStudentRoute ? "" : "max-w-full mx-auto bg-white/5 border border-white/10 rounded-2xl p-4 md:p-6 shadow-xl backdrop-blur-md"}>
             <Routes>
-
               {/* PUBLIC */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-              <Route
-                path="/"
-                element={<LandingPage />}
-              />
+              {/* TEACHER AUTH */}
+              <Route path="/teacher/login" element={<TeacherLogin />} />
+              <Route path="/teacher/register" element={<TeacherRegister />} />
 
-              <Route
-                path="/login"
-                element={<Login />}
-              />
-
-              <Route
-                path="/register"
-                element={<Register />}
-              />
-
-              {/* STUDENT */}
-
-              <Route
-                element={
-                  <ProtectedRoute
-                    allowedRoles={[
-                      "student"
-                    ]}
-                  />
-                }
-              >
-
-                <Route
-                  path="/dashboard"
-                  element={
-                    <AlgoDashboard />
-                  }
-                />
-
-                <Route
-                  path="/algo/:id"
-                  element={
-                    <AlgoWorkspace />
-                  }
-                />
-
+              {/* TEACHER PROTECTED */}
+              <Route element={<TeacherRoute />}>
+                <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+                <Route path="/teacher/lab/:labId" element={<TeacherLabDetail />} />
               </Route>
 
-              {/* ADMIN */}
-
-              <Route
-                path="/admin"
-                element={
-                  <AdminRoute>
-                    <AdminDashboard />
-                  </AdminRoute>
-                }
-              />
-
-              <Route
-                path="/admin/students"
-                element={
-                  <AdminRoute>
-                    <AdminStudents />
-                  </AdminRoute>
-                }
-              />
-
-              <Route
-                path="/admin/students/:id"
-                element={
-                  <AdminRoute>
-                    <StudentDetails />
-                  </AdminRoute>
-                }
-              />
-
+              {/* STUDENT - UNIFIED PORTAL WITH SIDEBAR */}
+              <Route element={<ProtectedRoute allowedRoles={["student"]} withLayout={true} />}>
+                <Route path="/student/dashboard" element={<StudentDashboard />} />
+                <Route path="/student/lab/:labId" element={<StudentLabDetail />} />
+                <Route path="/algo-dashboard" element={<AlgoDashboard />} />
+                <Route path="/algo/:id" element={<AlgoWorkspace />} />
+              </Route>
             </Routes>
-
           </div>
-
         </div>
-
       </div>
-
     </>
   );
 }

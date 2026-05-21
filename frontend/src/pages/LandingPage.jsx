@@ -17,7 +17,7 @@ import { motion } from "motion/react";
 
 import { useNavigate } from "react-router-dom";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "../components/ui/button";
 
 function FloatingIcon({
     icon,

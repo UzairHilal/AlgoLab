@@ -44,7 +44,7 @@ function AlgoWorkspace() {
 
     } else {
 
-      navigate("/");
+      navigate("/algo-dashboard");
     }
   };
 

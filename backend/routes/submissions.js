@@ -1,145 +1,125 @@
 import express from "express";
 import Submission from "../models/Submission.js";
-import {
-  authMiddleware,
-  adminOnly
-} from "../middleware/auth.js";
+import Practical from "../models/Practical.js";
+import Evaluation from "../models/Evaluation.js";
+import { authMiddleware } from "../middleware/auth.js";
 
 const router = express.Router();
 
+// STUDENT SUBMIT CODE
+router.post("/", authMiddleware, async (req, res) => {
+  try {
+    const { practicalId, code, language } = req.body;
+    const studentId = req.user.id;
 
-// ================= SAVE / UPDATE =================
+    const practical = await Practical.findById(practicalId);
+    const isLate = practical?.deadline && new Date() > new Date(practical.deadline);
 
-router.post(
-  "/save",
-  authMiddleware,
-  async (req, res) => {
+    let submission = await Submission.findOne({ studentId, practicalId });
 
-    try {
-
-      const userId = req.user.id;
-
-      const {
-        algorithmSlug,
+    if (submission) {
+      submission.code = code;
+      submission.language = language || "python";
+      submission.status = isLate ? "late" : "submitted";
+      submission.submittedAt = new Date();
+      await submission.save();
+    } else {
+      submission = await Submission.create({
+        studentId,
+        practicalId,
         code,
-        language,
-        passed
-      } = req.body;
-
-      let submission =
-        await Submission.findOne({
-          studentId: userId,
-          algorithmSlug
-        });
-
-      if (submission) {
-
-        submission.code = code;
-        submission.language = language;
-        submission.passed = passed;
-
-        await submission.save();
-
-      } else {
-
-        submission =
-          await Submission.create({
-            studentId: userId,
-            algorithmSlug,
-            code,
-            language,
-            passed
-          });
-      }
-
-      res.json({
-        success: true,
-        submission
-      });
-
-    } catch (err) {
-
-      res.status(500).json({
-        success: false,
-        error: err.message
+        language: language || "python",
+        status: isLate ? "late" : "submitted",
+        submittedAt: new Date()
       });
     }
+
+    res.json(submission);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-);
+});
 
+// GET SUBMISSION FOR STUDENT (for a specific practical) - with evaluation
+router.get("/my/:practicalId", authMiddleware, async (req, res) => {
+  try {
+    const submission = await Submission.findOne({
+      studentId: req.user.id,
+      practicalId: req.params.practicalId
+    });
 
-// ================= GET SAVED CODE =================
-
-router.get(
-  "/:slug",
-  authMiddleware,
-  async (req, res) => {
-
-    try {
-
-      const submission =
-        await Submission.findOne({
-          studentId: req.user.id,
-          algorithmSlug: req.params.slug
-        });
-
-        // console.log("Submission: ", submission)
-      res.json({
-        success: true,
-        submission
-      });
-
-    } catch (err) {
-
-      res.status(500).json({
-        success: false,
-        error: err.message
-      });
+    let evaluation = null;
+    if (submission) {
+      evaluation = await Evaluation.findOne({ submissionId: submission._id });
     }
+
+    res.json({
+      submission,
+      evaluation
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-);
+});
 
-router.delete(
-  "/reset/:slug",
-  authMiddleware,
-  async (req, res) => {
-
-    try {
-
-      await Submission.findOneAndDelete({
-        studentId: req.user.id,
-        algorithmSlug: req.params.slug
-      });
-
-      res.json({
-        success: true,
-        message: "Submission reset"
-      });
-
-    } catch (err) {
-
-      res.status(500).json({
-        success: false,
-        error: err.message
-      });
-    }
-  }
-);
-
-// ================= ADMIN VIEW =================
-
-router.get(
-  "/",
-  authMiddleware,
-  adminOnly,
-  async (req, res) => {
-
-    const submissions =
-      await Submission.find()
-        .populate("studentId");
-
+// GET ALL MY SUBMISSIONS
+router.get("/my", authMiddleware, async (req, res) => {
+  try {
+    const submissions = await Submission.find({ studentId: req.user.id })
+      .populate("practicalId", "title deadline");
     res.json(submissions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-);
+});
+
+// GET SUBMISSIONS BY PRACTICAL (TEACHER)
+router.get("/practical/:practicalId", authMiddleware, async (req, res) => {
+  try {
+    const submissions = await Submission.find({ practicalId: req.params.practicalId })
+      .populate("studentId", "fullName rollNumber");
+
+    const submissionIds = submissions.map(s => s._id);
+    const evaluations = await Evaluation.find({ submissionId: { $in: submissionIds } });
+
+    const evalMap = {};
+    evaluations.forEach(e => { evalMap[e.submissionId.toString()] = e; });
+
+    const result = submissions.map(s => ({
+      ...s.toObject(),
+      evaluation: evalMap[s._id.toString()] || null
+    }));
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET ALL SUBMISSIONS FOR A LAB (with evaluation)
+router.get("/lab/:labId", authMiddleware, async (req, res) => {
+  try {
+    const practicals = await Practical.find({ labId: req.params.labId });
+    const practicalIds = practicals.map(p => p._id);
+    const submissions = await Submission.find({ practicalId: { $in: practicalIds } })
+      .populate("studentId", "fullName rollNumber")
+      .populate("practicalId", "title");
+
+    const submissionIds = submissions.map(s => s._id);
+    const evaluations = await Evaluation.find({ submissionId: { $in: submissionIds } });
+
+    const evalMap = {};
+    evaluations.forEach(e => { evalMap[e.submissionId.toString()] = e; });
+
+    const result = submissions.map(s => ({
+      ...s.toObject(),
+      evaluation: evalMap[s._id.toString()] || null
+    }));
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 export default router;

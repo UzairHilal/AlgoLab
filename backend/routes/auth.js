@@ -169,6 +169,7 @@ router.post("/login", async (req, res) => {
       token,
       role: user.role,
       user: {
+        id: user._id,
         fullName: user.fullName,
         rollNumber: user.rollNumber,
         role: user.role
@@ -182,6 +183,16 @@ router.post("/login", async (req, res) => {
     res.status(500).json({
       msg: "Server error"
     });
+  }
+});
+
+
+router.get("/all-students", async (req, res) => {
+  try {
+    const students = await User.find({ role: "student" }).select("fullName rollNumber");
+    res.json(students);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

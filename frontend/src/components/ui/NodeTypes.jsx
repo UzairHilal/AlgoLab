@@ -1,43 +1,57 @@
 import { Handle, Position } from "@xyflow/react";
-import { Bold } from "lucide-react";
 
-// OvalShape (Start and End)
+const activeFilter = "drop-shadow(0 0 6px #22d3ee) drop-shadow(0 0 10px #22d3eeaa)";
+
 const TerminalNode = ({ data }) => (
   <div
     style={{
-      padding: "10px 24px",
-      borderRadius: 999,
-      textAlign: "center",
-      fontSize: 13,
-      fontWeight: 600,
-      background: data.background,
-      border: `2px solid ${data.borderColor}`,
+      filter: data.isActive ? activeFilter : "none",
+      transition: "filter 0.2s ease",
+      display: "inline-block",
     }}
   >
-    <Handle type="target" position={Position.Top} />
-    {data.label}
-    <Handle type="source" position={Position.Bottom} />
+    <div
+      style={{
+        padding: "10px 24px",
+        borderRadius: 999,
+        textAlign: "center",
+        fontSize: 13,
+        fontWeight: 600,
+        background: data.background,
+        border: `2px solid ${data.borderColor}`,
+      }}
+    >
+      <Handle type="target" position={Position.Top} />
+      {data.label}
+      <Handle type="source" position={Position.Bottom} />
+    </div>
   </div>
 );
 
-// Rectangle (Process, assignments, calculations)
 const ProcessNode = ({ data }) => (
   <div
     style={{
-      padding: "10px 16px",
-      textAlign: "center",
-      fontSize: 13,
-      background: data.background,
-      border: `2px solid ${data.borderColor}`,
+      filter: data.isActive ? activeFilter : "none",
+      transition: "filter 0.2s ease",
+      display: "inline-block",
     }}
   >
-    <Handle type="target" position={Position.Top} />
-    {data.label}
-    <Handle type="source" position={Position.Bottom} />
+    <div
+      style={{
+        padding: "10px 16px",
+        textAlign: "center",
+        fontSize: 13,
+        background: data.background,
+        border: `2px solid ${data.borderColor}`,
+      }}
+    >
+      <Handle type="target" position={Position.Top} />
+      {data.label}
+      <Handle type="source" position={Position.Bottom} />
+    </div>
   </div>
 );
 
-// Diamond (Decision)
 const DecisionNode = ({ data }) => (
   <div
     style={{
@@ -47,6 +61,8 @@ const DecisionNode = ({ data }) => (
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
+      filter: data.isActive ? activeFilter : "none",
+      transition: "filter 0.2s ease",
     }}
   >
     <div
@@ -76,39 +92,53 @@ const DecisionNode = ({ data }) => (
   </div>
 );
 
-// Parallelogram → Input / Output / Found / Not Found
 const IoNode = ({ data }) => (
   <div
     style={{
-      padding: "10px 28px",
-      textAlign: "center",
-      fontSize: 13,
-      background: data.background,
-      border: `2px solid ${data.borderColor}`,
-      clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
+      filter: data.isActive ? activeFilter : "none",
+      transition: "filter 0.2s ease",
+      display: "inline-block",
     }}
   >
-    <Handle type="target" position={Position.Top} />
-    {data.label}
-    <Handle type="source" position={Position.Bottom} />
+    <div
+      style={{
+        padding: "10px 28px",
+        textAlign: "center",
+        fontSize: 13,
+        background: data.background,
+        border: `2px solid ${data.borderColor}`,
+        clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
+      }}
+    >
+      <Handle type="target" position={Position.Top} />
+      {data.label}
+      <Handle type="source" position={Position.Bottom} />
+    </div>
   </div>
 );
 
-// Rectangle with double vertical lines → Predefined process (recursive calls)
 const CallNode = ({ data }) => (
   <div
     style={{
-      position: "relative",
-      padding: "10px 24px",
-      textAlign: "center",
-      fontSize: 13,
-      background: data.background,
-      border: `2px solid ${data.borderColor}`,
+      filter: data.isActive ? activeFilter : "none",
+      transition: "filter 0.2s ease",
+      display: "inline-block",
     }}
   >
-    <Handle type="target" position={Position.Top} />
-    {data.label}
-    <Handle type="source" position={Position.Bottom} />
+    <div
+      style={{
+        position: "relative",
+        padding: "10px 24px",
+        textAlign: "center",
+        fontSize: 13,
+        background: data.background,
+        border: `2px solid ${data.borderColor}`,
+      }}
+    >
+      <Handle type="target" position={Position.Top} />
+      {data.label}
+      <Handle type="source" position={Position.Bottom} />
+    </div>
   </div>
 );
 

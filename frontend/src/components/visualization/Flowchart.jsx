@@ -3,8 +3,9 @@ import "@xyflow/react/dist/style.css";
 import { ReactFlow, Background, Controls } from "@xyflow/react";
 import dagre from "@dagrejs/dagre";
 import { nodeTypes } from "@/components/ui/NodeTypes";
+import { buildSteps, INPUT_FIELDS } from "@/lib/dryRunEngines";
 
-// ---------------- DAGRE SETUP ----------------
+// ─── DAGRE LAYOUT ─────────────────────────────────────────────────────────────
 const nodeWidth = 180;
 const nodeHeight = 70;
 
@@ -12,104 +13,64 @@ function getLayoutedElements(nodes, edges) {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({ rankdir: "TB" });
-
-  nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
-  });
-
-  edges.forEach((edge) => {
-    dagreGraph.setEdge(edge.source, edge.target);
-  });
-
+  nodes.forEach((n) => dagreGraph.setNode(n.id, { width: nodeWidth, height: nodeHeight }));
+  edges.forEach((e) => dagreGraph.setEdge(e.source, e.target));
   dagre.layout(dagreGraph);
-
   return {
     nodes: nodes.map((node) => {
       const pos = dagreGraph.node(node.id);
-      return {
-        ...node,
-        position: {
-          x: pos.x - nodeWidth / 2,
-          y: pos.y - nodeHeight / 2,
-        },
-        sourcePosition: "bottom",
-        targetPosition: "top",
-      };
+      return { ...node, position: { x: pos.x - nodeWidth / 2, y: pos.y - nodeHeight / 2 }, sourcePosition: "bottom", targetPosition: "top" };
     }),
     edges,
   };
 }
 
-// ---------------- PALINDROME DRY RUN ENGINE ----------------
-// Each step: { nodeId, label, left, right, matched, result }
-// nodeId must match your rawNodes ids exactly (adjust if yours differ)
-function buildPalindromeSteps(s) {
-  if (!s) return [];
-  const n = s.length;
-  const steps = [];
+// ─── ARRAY VISUALIZER ────────────────────────────────────────────────────────
+function ArrayViz({ arr, pointers = {} }) {
+  if (!arr || arr.length === 0) return null;
+  const { active = [], found = [], swapped = [], mid = [] } = pointers;
 
-  steps.push({ nodeId: "start",  label: "Start",                               left: null, right: null, matched: [] });
-  steps.push({ nodeId: "input",  label: `Input: "${s}"`,                        left: null, right: null, matched: [] });
-  steps.push({ nodeId: "init",   label: `left = 0,  right = ${n - 1}`,          left: 0,    right: n-1,  matched: [] });
+  return (
+    <div className="flex flex-wrap gap-1 my-1">
+      {arr.map((val, i) => {
+        let bg = "bg-zinc-700 border-zinc-600 text-zinc-200";
+        if (found.includes(i))   bg = "bg-green-800 border-green-400 text-green-200";
+        else if (swapped.includes(i)) bg = "bg-yellow-800 border-yellow-400 text-yellow-200";
+        else if (mid.includes(i))     bg = "bg-purple-800 border-purple-400 text-purple-200";
+        else if (active.includes(i))  bg = "bg-cyan-800 border-cyan-400 text-cyan-200";
 
-  let l = 0, r = n - 1, matched = [];
-
-  while (true) {
-    steps.push({
-      nodeId: "cond1",
-      label: `left < right?  (${l} < ${r})  →  ${l < r}`,
-      left: l, right: r, matched: [...matched],
-    });
-
-    if (l >= r) {
-      steps.push({ nodeId: "palindrome", label: "✓ Is a Palindrome", left: l, right: r, matched: [...matched], result: "yes" });
-      steps.push({ nodeId: "end",        label: "End",                left: l, right: r, matched: [...matched] });
-      break;
-    }
-
-    steps.push({
-      nodeId: "cond2",
-      label: `s[${l}] == s[${r}]?  ('${s[l]}' == '${s[r]}')  →  ${s[l] === s[r]}`,
-      left: l, right: r, matched: [...matched],
-    });
-
-    if (s[l] !== s[r]) {
-      steps.push({ nodeId: "not_palindrome", label: "✗ Not a Palindrome", left: l, right: r, matched: [...matched], result: "no" });
-      steps.push({ nodeId: "end",            label: "End",                left: l, right: r, matched: [...matched] });
-      break;
-    }
-
-    matched = [...matched, l, r];
-    steps.push({
-      nodeId: "increment",
-      label: `Match! '${s[l]}'  →  left++ = ${l+1},  right-- = ${r-1}`,
-      left: l+1, right: r-1, matched: [...matched],
-    });
-    l++; r--;
-  }
-
-  return steps;
+        return (
+          <div key={i} className={`min-w-[28px] h-7 px-1 flex flex-col items-center justify-center rounded border font-mono text-xs font-bold ${bg}`}>
+            <span>{val}</span>
+            <span className="text-[9px] opacity-60">{i}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
-// ---------------- STRING VISUALIZER ----------------
-function StringViz({ s, left, right, matched }) {
+// ─── STRING VISUALIZER ───────────────────────────────────────────────────────
+function StringViz({ s, pointers = {} }) {
   if (!s) return null;
+  const { left, right, matched = [] } = pointers;
+
   return (
-    <div className="flex flex-wrap gap-1 my-2">
+    <div className="flex flex-wrap gap-1 my-1">
       {s.split("").map((ch, i) => {
-        const isMatched = matched?.includes(i);
+        const isMatched = matched.includes(i);
         const isLeft    = left === i && right !== i;
         const isRight   = right === i && left !== i;
         const isBoth    = left === i && right === i;
 
         let bg = "bg-zinc-700 border-zinc-600 text-zinc-200";
-        if (isMatched) bg = "bg-green-900 border-green-500 text-green-300";
-        if (isLeft)    bg = "bg-cyan-900 border-cyan-400 text-cyan-200";
-        if (isRight)   bg = "bg-orange-900 border-orange-400 text-orange-200";
-        if (isBoth)    bg = "bg-purple-900 border-purple-400 text-purple-200";
+        if (isMatched) bg = "bg-green-800 border-green-400 text-green-200";
+        if (isLeft)    bg = "bg-cyan-800 border-cyan-400 text-cyan-200";
+        if (isRight)   bg = "bg-orange-800 border-orange-400 text-orange-200";
+        if (isBoth)    bg = "bg-purple-800 border-purple-400 text-purple-200";
 
         return (
-          <div key={i} className={`w-8 h-8 flex items-center justify-center rounded border font-mono text-sm font-bold ${bg}`}>
+          <div key={i} className={`w-7 h-7 flex items-center justify-center rounded border font-mono text-xs font-bold ${bg}`}>
             {ch}
           </div>
         );
@@ -118,58 +79,147 @@ function StringViz({ s, left, right, matched }) {
   );
 }
 
-// ---------------- RIGHT PANEL ----------------
-function DryRunPanel({ activeStep, steps, onNext, onPrev, onReset, inputVal, onInputChange, onRun }) {
-  const s = inputVal;
+// ─── INFO TAB ────────────────────────────────────────────────────────────────
+function InfoTab({ algo }) {
+  return (
+    <div className="flex flex-col gap-4 p-4 overflow-y-auto h-full text-sm">
+      {/* Description */}
+      <div>
+        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1">About</p>
+        <p className="text-zinc-200 leading-relaxed">{algo.theory?.description}</p>
+      </div>
+
+      {/* Complexity */}
+      <div>
+        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1">Complexity</p>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-zinc-800 rounded p-2 border border-zinc-700">
+            <div className="text-[10px] text-zinc-500">Time</div>
+            <div className="text-zinc-200 font-mono text-xs font-medium">{algo.theory?.timeComplexity}</div>
+          </div>
+          <div className="bg-zinc-800 rounded p-2 border border-zinc-700">
+            <div className="text-[10px] text-zinc-500">Space</div>
+            <div className="text-zinc-200 font-mono text-xs font-medium">{algo.theory?.spaceComplexity}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Key Points */}
+      {algo.keyPoints?.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1">Key Points</p>
+          <ul className="list-disc list-inside space-y-1 text-zinc-300">
+            {algo.keyPoints.map((kp, i) => <li key={i}>{kp}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {/* Pros / Cons */}
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <p className="text-xs font-semibold text-green-500 uppercase tracking-widest mb-1">Pros</p>
+          <ul className="space-y-1 text-zinc-300">
+            {algo.pros?.map((p, i) => <li key={i} className="flex gap-1"><span className="text-green-500">+</span>{p}</li>)}
+          </ul>
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-red-400 uppercase tracking-widest mb-1">Cons</p>
+          <ul className="space-y-1 text-zinc-300">
+            {algo.cons?.map((c, i) => <li key={i} className="flex gap-1"><span className="text-red-400">−</span>{c}</li>)}
+          </ul>
+        </div>
+      </div>
+
+      {/* Examples */}
+      {algo.examples?.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1">Examples</p>
+          <div className="space-y-2">
+            {algo.examples.map((ex, i) => (
+              <div key={i} className="bg-zinc-800 rounded p-2 border border-zinc-700 text-xs">
+                <div><span className="text-zinc-500">Input: </span><span className="font-mono text-cyan-300">{String(ex.input)}</span></div>
+                <div><span className="text-zinc-500">Output: </span><span className="font-mono text-green-300">{String(ex.output)}</span></div>
+                {ex.explanation && <div className="text-zinc-400 mt-1">{ex.explanation}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── DRY RUN TAB ─────────────────────────────────────────────────────────────
+function DryRunTab({ algo, activeStep, steps, onNext, onPrev, onReset, inputs, onInputChange, onRun }) {
+  const fields = INPUT_FIELDS[algo.slug] || [];
   const st = steps[activeStep];
+  const isString = algo.slug === "palindrome-check";
 
   return (
-    <div className="flex flex-col gap-3 h-full overflow-y-auto p-4 bg-zinc-900 border-l border-zinc-700 w-80 shrink-0">
-      <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">Dry Run</p>
-
-      {/* Input */}
-      <div className="flex gap-2">
-        <input
-          className="flex-1 bg-zinc-800 border border-zinc-600 rounded px-3 py-1.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500"
-          placeholder="Enter a string…"
-          value={inputVal}
-          maxLength={16}
-          onChange={(e) => onInputChange(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && onRun()}
-        />
+    <div className="flex flex-col gap-3 p-4 overflow-y-auto h-full">
+      {/* Input fields */}
+      <div className="flex flex-col gap-2">
+        {fields.map((field) => (
+          <div key={field.key} className="flex items-center">
+            <label className="text-xs text-zinc-400 w-28 shrink">{field.label}</label>
+            <input
+              className="flex-1 bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500 font-mono"
+              placeholder={field.placeholder}
+              value={inputs[field.key] ?? ""}
+              onChange={(e) => onInputChange(field.key, e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && onRun()}
+            />
+          </div>
+        ))}
         <button
           onClick={onRun}
-          className="px-3 py-1.5 text-sm bg-cyan-600 hover:bg-cyan-500 text-white rounded font-medium transition-colors"
+          className="mt-1 py-1.5 text-xs bg-cyan-600 hover:bg-cyan-500 text-white rounded font-medium transition-colors"
         >
-          Run
+          Run ↗
         </button>
       </div>
 
-      {/* String visualizer */}
-      {s && steps.length > 0 && (
-        <>
-          <div className="flex gap-3 text-xs text-zinc-400">
-            <span><span className="inline-block w-2.5 h-2.5 rounded-sm bg-cyan-700 border border-cyan-400 mr-1"/>left</span>
-            <span><span className="inline-block w-2.5 h-2.5 rounded-sm bg-orange-700 border border-orange-400 mr-1"/>right</span>
-            <span><span className="inline-block w-2.5 h-2.5 rounded-sm bg-purple-700 border border-purple-400 mr-1"/>both</span>
-            <span><span className="inline-block w-2.5 h-2.5 rounded-sm bg-green-800 border border-green-500 mr-1"/>matched</span>
-          </div>
-          <StringViz s={s} left={st?.left ?? null} right={st?.right ?? null} matched={st?.matched ?? []} />
-        </>
+      {/* Visualizer */}
+      {steps.length > 0 && (
+        <div>
+          {isString ? (
+            <>
+              <div className="flex gap-3 text-[10px] text-zinc-400 mb-1">
+                <span><span className="inline-block w-2 h-2 rounded-sm bg-cyan-700 border border-cyan-400 mr-1" />left</span>
+                <span><span className="inline-block w-2 h-2 rounded-sm bg-orange-700 border border-orange-400 mr-1" />right</span>
+                <span><span className="inline-block w-2 h-2 rounded-sm bg-purple-700 border border-purple-400 mr-1" />both</span>
+                <span><span className="inline-block w-2 h-2 rounded-sm bg-green-800 border border-green-400 mr-1" />matched</span>
+              </div>
+              <StringViz s={inputs["0"]} pointers={st?.pointers ?? {}} />
+            </>
+          ) : st?.arrayCopy ? (
+            <>
+              <div className="flex gap-3 text-[10px] text-zinc-400 mb-1">
+                <span><span className="inline-block w-2 h-2 rounded-sm bg-cyan-700 border border-cyan-400 mr-1" />active</span>
+                <span><span className="inline-block w-2 h-2 rounded-sm bg-yellow-700 border border-yellow-400 mr-1" />swap</span>
+                <span><span className="inline-block w-2 h-2 rounded-sm bg-green-800 border border-green-400 mr-1" />found/done</span>
+              </div>
+              <ArrayViz arr={st.arrayCopy} pointers={st.arrayPointers ?? {}} />
+            </>
+          ) : st?.arrayPointers ? (
+            <>
+              <div className="flex gap-3 text-[10px] text-zinc-400 mb-1">
+                <span><span className="inline-block w-2 h-2 rounded-sm bg-cyan-700 border border-cyan-400 mr-1" />active</span>
+                <span><span className="inline-block w-2 h-2 rounded-sm bg-green-800 border border-green-400 mr-1" />found</span>
+              </div>
+              <ArrayViz arr={inputs["0"]?.split(",").map(Number) ?? []} pointers={st.arrayPointers ?? {}} />
+            </>
+          ) : null}
+        </div>
       )}
 
       {/* Variable cards */}
-      {steps.length > 0 && (
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { label: "left",     val: st?.left  ?? "—" },
-            { label: "right",    val: st?.right ?? "—" },
-            { label: "s[left]",  val: st?.left  != null ? s[st.left]  ?? "—" : "—" },
-            { label: "s[right]", val: st?.right != null ? s[st.right] ?? "—" : "—" },
-          ].map(({ label, val }) => (
-            <div key={label} className="bg-zinc-800 rounded p-2 border border-zinc-700">
-              <div className="text-xs text-zinc-400">{label}</div>
-              <div className="text-lg font-mono font-semibold text-white">{String(val)}</div>
+      {steps.length > 0 && st?.vars && Object.keys(st.vars).length > 0 && (
+        <div className="h-30 grid grid-cols-2 grid-rows-2 gap-1.5 border-2 p-1">
+          {Object.entries(st.vars).map(([k, v]) => (
+            <div key={k} className="bg-zinc-800 rounded p-1.5 border border-zinc-700">
+              <div className="text-[10px] text-zinc-500">{k}</div>
+              <div className="text-sm font-mono font-semibold text-white truncate">{String(v)}</div>
             </div>
           ))}
         </div>
@@ -180,21 +230,15 @@ function DryRunPanel({ activeStep, steps, onNext, onPrev, onReset, inputVal, onI
         <>
           <div className="flex items-center justify-between text-xs text-zinc-400">
             <span>Step {activeStep + 1} / {steps.length}</span>
-            <button onClick={onReset} className="text-zinc-500 hover:text-zinc-300 transition-colors text-xs">Reset</button>
+            <button onClick={onReset} className="text-zinc-500 hover:text-zinc-300 text-xs transition-colors">Reset</button>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={onPrev}
-              disabled={activeStep === 0}
-              className="flex-1 py-1.5 text-sm border border-zinc-600 rounded text-zinc-300 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
+            <button onClick={onPrev} disabled={activeStep === 0}
+              className="flex-1 py-1 text-xs border border-zinc-600 rounded text-zinc-300 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
               ← Prev
             </button>
-            <button
-              onClick={onNext}
-              disabled={activeStep === steps.length - 1}
-              className="flex-1 py-1.5 text-sm border border-zinc-600 rounded text-zinc-300 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
+            <button onClick={onNext} disabled={activeStep === steps.length - 1}
+              className="flex-1 py-1 text-xs border border-zinc-600 rounded text-zinc-300 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
               Next →
             </button>
           </div>
@@ -203,81 +247,80 @@ function DryRunPanel({ activeStep, steps, onNext, onPrev, onReset, inputVal, onI
 
       {/* Step log */}
       {steps.length > 0 && (
-        <div className="flex flex-col gap-1 mt-1">
+        <div className="flex flex-col gap-1">
           {[...steps].slice(0, activeStep + 1).reverse().map((step, i) => {
-            const isActive = i === 0;
-            // const isResult = step.result === "yes" || step.result === "no";
-            let cls = "border-l-2 pl-2 py-1 text-xs rounded-r ";
-            if (isActive && step.result === "yes") cls += "border-green-400 bg-green-950 text-green-300 font-medium";
-            else if (isActive && step.result === "no") cls += "border-red-400 bg-red-950 text-red-300 font-medium";
-            else if (isActive) cls += "border-cyan-400 bg-zinc-800 text-white";
+            let cls = "border-l-2 pl-2 py-0.5 text-[11px] rounded-r ";
+            if (i === 0 && step.result === "yes") cls += "border-green-400 bg-green-950 text-green-300 font-medium";
+            else if (i === 0 && step.result === "no") cls += "border-red-400 bg-red-950 text-red-300 font-medium";
+            else if (i === 0) cls += "border-cyan-400 bg-zinc-800 text-white";
             else cls += "border-zinc-700 text-zinc-500";
-
             return <div key={i} className={cls}>{step.label}</div>;
           })}
         </div>
       )}
 
-      {/* Empty state */}
       {steps.length === 0 && (
-        <p className="text-sm text-zinc-500 mt-4">Type a string and press Run to start the dry run.</p>
+        <p className="text-xs text-zinc-500 mt-2">Fill in the inputs and press Run to step through the algorithm.</p>
       )}
     </div>
   );
 }
 
-// ---------------- COMPONENT ----------------
+// ─── VISUAL TAB ───────────────────────────────────────────────────────────────
 function VisualTab({ algo }) {
   const rawNodes = algo?.flowChartData?.rawNodes || [];
   const rawEdges = algo?.flowChartData?.rawEdges || [];
 
-  // Dry run state
-  const [inputVal,   setInputVal]   = useState("");
+  const [tab,        setTab]        = useState("info");   // "info" | "dryrun"
+  const [inputs,     setInputs]     = useState({});
   const [steps,      setSteps]      = useState([]);
   const [activeStep, setActiveStep] = useState(0);
 
   const activeNodeId = steps[activeStep]?.nodeId ?? null;
 
+  const handleInputChange = useCallback((key, val) => {
+    setInputs((prev) => ({ ...prev, [key]: val }));
+  }, []);
+
   const handleRun = useCallback(() => {
-    const trimmed = inputVal.trim();
-    if (!trimmed) return;
-    const s = buildPalindromeSteps(trimmed);
+    const fields = INPUT_FIELDS[algo.slug] || [];
+    const vals = fields.map((f) => inputs[f.key] ?? "");
+    if (vals.some((v) => v === "")) return;
+    const s = buildSteps(algo.slug, vals);
     setSteps(s);
     setActiveStep(0);
-  }, [inputVal]);
+    setTab("dryrun");
+  }, [algo.slug, inputs]);
 
-  // Styled edges — unchanged from your original
-  const styledEdges = useMemo(() => {
-    return rawEdges.map((edge) => ({
-      ...edge,
-      type: "smoothstep",
-      animated: true,
-      labelStyle: { fontWeight: "bold", fill: "#000" },
-      style: { strokeWidth: 2 },
-      markerEnd: { type: "arrowclosed", color: "#fff" },
-    }));
-  }, [rawEdges]);
+  const handleReset = useCallback(() => {
+    setSteps([]);
+    setActiveStep(0);
+    setInputs({});
+  }, []);
 
-  // Dagre layout — unchanged from your original
-  const { nodes: layoutedNodes, edges } = useMemo(() => {
-    return getLayoutedElements(rawNodes, styledEdges);
-  }, [rawNodes, styledEdges]);
+  // Styled edges
+  const styledEdges = useMemo(() => rawEdges.map((edge) => ({
+    ...edge,
+    type: "smoothstep",
+    animated: true,
+    labelStyle: { fontWeight: "bold", fill: "#000" },
+    style: { strokeWidth: 2 },
+    markerEnd: { type: "arrowclosed", color: "#fff" },
+  })), [rawEdges]);
 
-  // ✅ Inject isActive into node data — does NOT touch layout or structure
-  const nodes = useMemo(() => {
-    return layoutedNodes.map((node) => ({
-      ...node,
-      data: {
-        ...node.data,
-        isActive: node.id === activeNodeId,
-      },
-    }));
-  }, [layoutedNodes, activeNodeId]);
+  // Layout
+  const { nodes: layoutedNodes, edges } = useMemo(() => getLayoutedElements(rawNodes, styledEdges), [rawNodes, styledEdges]);
+
+  // Inject isActive into node data
+  const nodes = useMemo(() => layoutedNodes.map((node) => ({
+    ...node,
+    data: { ...node.data, isActive: node.id === activeNodeId },
+  })), [layoutedNodes, activeNodeId]);
 
   return (
     <div className="flex h-[85vh]">
-      {/* ---- Flowchart (unchanged ReactFlow block) ---- */}
-      <div className="flex-1 min-w-0">
+      {/* ── Flowchart ── */}
+      <div className="flex-1 min-w-0 back">
         <h2 className="font-bold mb-2">{algo.title} Flow Chart</h2>
         <div className="w-full h-full text-black">
           <ReactFlow
@@ -293,27 +336,45 @@ function VisualTab({ algo }) {
             elementsSelectable={false}
           >
             <Background gap={30} />
-            <Controls
-              className="p-4"
-              fitViewOptions={true}
-              showZoom={false}
-              showInteractive={false}
-            />
+            <Controls className="p-4" fitViewOptions showZoom={false} showInteractive={false} />
           </ReactFlow>
         </div>
       </div>
 
-      {/* ---- Right panel ---- */}
-      <DryRunPanel
-        activeStep={activeStep}
-        steps={steps}
-        onNext={() => setActiveStep((p) => Math.min(p + 1, steps.length - 1))}
-        onPrev={() => setActiveStep((p) => Math.max(p - 1, 0))}
-        onReset={() => { setSteps([]); setActiveStep(0); setInputVal(""); }}
-        inputVal={inputVal}
-        onInputChange={setInputVal}
-        onRun={handleRun}
-      />
+      {/* ── Right panel ── */}
+      <div className="w-52 sm:w-72 md:w-80 shrink-0 flex flex-col bg-zinc-900 border rounded-xl border-zinc-700 overflow-hidden">
+        {/* Tab bar */}
+        <div className="flex border-b border-zinc-700 shrink-0">
+          {["info", "dryrun"].map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`flex-1 py-2 text-xs font-semibold uppercase tracking-wider transition-colors
+                ${tab === t ? "text-cyan-400 border-b-2 border-cyan-400" : "text-zinc-500 hover:text-zinc-300"}`}
+            >
+              {t === "info" ? "Info & Examples" : "Walkthrough"}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab content */}
+        <div className="flex-1 overflow-hidden">
+          {tab === "info"
+            ? <InfoTab algo={algo} />
+            : <DryRunTab
+                algo={algo}
+                activeStep={activeStep}
+                steps={steps}
+                onNext={() => setActiveStep((p) => Math.min(p + 1, steps.length - 1))}
+                onPrev={() => setActiveStep((p) => Math.max(p - 1, 0))}
+                onReset={handleReset}
+                inputs={inputs}
+                onInputChange={handleInputChange}
+                onRun={handleRun}
+              />
+          }
+        </div>
+      </div>
     </div>
   );
 }

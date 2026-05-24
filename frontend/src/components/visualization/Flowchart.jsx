@@ -6,10 +6,9 @@ import { nodeTypes } from "@/components/ui/NodeTypes";
 import { buildSteps, INPUT_FIELDS } from "@/lib/dryRunEngines";
 import { Footprints } from "lucide-react";
 
-// ─── DAGRE LAYOUT ─────────────────────────────────────────────────────────────
+// DAGRE code used for the auto vertical layout of the flowchart nodes
 const nodeWidth = 180;
 const nodeHeight = 70;
-
 function getLayoutedElements(nodes, edges) {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -33,7 +32,7 @@ function getLayoutedElements(nodes, edges) {
   };
 }
 
-// ─── ARRAY VISUALIZER ────────────────────────────────────────────────────────
+// ARRAY VISUALIZER (array boxes below run button) for array like in linear search
 function ArrayViz({ arr, pointers = {} }) {
   if (!arr || arr.length === 0) return null;
   const { active = [], found = [], swapped = [], mid = [] } = pointers;
@@ -64,8 +63,8 @@ function ArrayViz({ arr, pointers = {} }) {
     </div>
   );
 }
-
-// ─── STRING VISUALIZER ───────────────────────────────────────────────────────
+ 
+// STRING VISUALIZER (array boxes below run button) for stirngs like in palindrome
 function StringViz({ s, pointers = {} }) {
   if (!s) return null;
   const { left, right, matched = [] } = pointers;
@@ -146,7 +145,7 @@ function DryRunTab({
         </button>
       </div>
 
-      {/* Visualizer */}
+      {/* Visualizer -- array display [][][][] */}
       {steps.length > 0 && (
         <div>
           {isString ? (
@@ -210,7 +209,7 @@ function DryRunTab({
         </div>
       )}
 
-      {/* Variable cards */}
+      {/* Variable cards to display current value stored in a variable. Displayed above the prev and next button*/}
       {steps.length > 0 && st?.vars && Object.keys(st.vars).length > 0 && (
         <div className="h-30 grid grid-cols-2 grid-rows-2 gap-1.5 border-2 p-1">
           {Object.entries(st.vars).map(([k, v]) => (
@@ -227,7 +226,7 @@ function DryRunTab({
         </div>
       )}
 
-      {/* Step counter + controls */}
+      {/* Step counter labels + controls */}
       {steps.length > 0 && (
         <>
           <div className="flex items-center justify-between text-xs text-zinc-400">

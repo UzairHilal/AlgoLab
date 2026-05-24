@@ -441,8 +441,7 @@ function buildMergeSortSteps(arr) {
   return steps;
 }
 
-// ─── Router ───────────────────────────────────────────────────────────────────
-// input is the parsed user-provided values array, e.g. [42] or [2, 3] or [[4,2,7], 7]
+// Router - returns the current algo steps
 export function buildSteps(slug, inputs) {
   switch (slug) {
     case "palindrome-check":     return buildPalindromeSteps(inputs[0]);
@@ -463,6 +462,7 @@ export function buildSteps(slug, inputs) {
 
 // Per-slug input field definitions for the panel UI
 // Each field: { label, placeholder, key }
+// this is used to define the label, placeholder of the input field in each flowchart
 export const INPUT_FIELDS = {
   "palindrome-check":   [{ label: "String", placeholder: "e.g. racecar", key: "0" }],
   "sum-of-two-numbers": [{ label: "a", placeholder: "e.g. 5", key: "0" }, { label: "b", placeholder: "e.g. 7", key: "1" }],

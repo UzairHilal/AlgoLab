@@ -1,6 +1,6 @@
 import { Handle, Position } from "@xyflow/react";
 
-const activeFilter = "drop-shadow(0 0 6px #22d3ee) drop-shadow(0 0 10px #22d3eeaa)";
+const activeFilter = "drop-shadow(0 0 6px #22d3ee) drop-shadow(0 0 10px #22d3eeaa)"; //this active filter is used to highlight the flowchart nodes corresponding to the dryrun tab steps
 
 const TerminalNode = ({ data }) => (
   <div
